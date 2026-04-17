@@ -22,11 +22,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Nav, ProductCard, CartSidebar, FloatingWhatsApp, LogisticsWidget } from './SharedComponents';
+import { Nav, ProductCard, CartSidebar, WishlistSidebar, FloatingWhatsApp, FloatingSupport, LogisticsWidget } from './SharedComponents';
 import { ARTISANS, PRODUCTS } from '../lib/constants';
 
 export default function ArtisanMarketplace() {
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 800], [1, 1.25]);
@@ -36,6 +38,8 @@ export default function ArtisanMarketplace() {
     <div className="min-h-screen relative font-sans selection:bg-terracotta selection:text-white pb-20">
       <Nav />
       <CartSidebar />
+      <WishlistSidebar />
+      <FloatingSupport />
       <FloatingWhatsApp />
 
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-sand">
@@ -197,9 +201,29 @@ export default function ArtisanMarketplace() {
             <>
               <h2 className="text-6xl md:text-8xl font-heading">Rejoignez <br /><span className="italic font-light">l'Avant-Garde</span></h2>
               <p className="text-xl opacity-80 font-serif italic max-w-2xl mx-auto">Soyez le premier informé des nouvelles collections privées et des récits de nos maîtres artisans.</p>
-              <form onSubmit={(e) => { e.preventDefault(); setIsSubscribed(true); }} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white/10 p-2 rounded-full border border-white/20 backdrop-blur-md">
-                <input type="email" placeholder="Votre email secret..." className="flex-1 bg-transparent border-none focus:ring-0 px-8 text-white placeholder:text-white/40" required />
+              <form 
+                onSubmit={(e) => { 
+                  e.preventDefault(); 
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (!emailRegex.test(email)) {
+                    setEmailError('Veuillez entrer une adresse email valide.');
+                    return;
+                  }
+                  setEmailError('');
+                  setIsSubscribed(true); 
+                }} 
+                className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white/10 p-2 rounded-full border border-white/20 backdrop-blur-md relative"
+              >
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Votre email secret..." 
+                  className="flex-1 bg-transparent border-none focus:ring-0 px-8 text-white placeholder:text-white/40" 
+                  required 
+                />
                 <Button className="bg-white text-terracotta hover:bg-white/90 rounded-full px-10 h-14 text-xs font-black uppercase tracking-widest">S'inscrire</Button>
+                {emailError && <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] text-white/80 font-black tracking-widest uppercase animate-pulse">{emailError}</p>}
               </form>
             </>
           ) : (
@@ -223,14 +247,33 @@ export default function ArtisanMarketplace() {
           </div>
           <div className="flex gap-12">
             {[
-              { title: "Galerie", items: ["Nouveautés", "Sculptures", "Textiles", "Céramiques"] },
-              { title: "Services", items: ["Sur Mesure", "Logistique", "Conciergerie", "Authentification"] },
-              { title: "Maison", items: ["Notre Histoire", "Les Artisans", "Engagements", "Contact"] }
+              { title: "Galerie", items: [
+                { name: "Nouveautés", link: "/marketplace" },
+                { name: "Sculptures", link: "/marketplace" },
+                { name: "Textiles", link: "/marketplace" },
+                { name: "Céramiques", link: "/marketplace" }
+              ] },
+              { title: "Services", items: [
+                { name: "Sur Mesure", link: "/#artisans" },
+                { name: "Logistique", link: "/marketplace" },
+                { name: "Conciergerie", link: "/marketplace" },
+                { name: "Authentification", link: "/marketplace" }
+              ] },
+              { title: "Maison", items: [
+                { name: "Notre Histoire", link: "/#artisans" },
+                { name: "Les Artisans", link: "/#artisans" },
+                { name: "Engagements", link: "/#artisans" },
+                { name: "Contact", link: "/marketplace" }
+              ] }
             ].map(col => (
               <div key={col.title} className="space-y-4">
                 <h5 className="text-[10px] uppercase font-black opacity-30 tracking-widest">{col.title}</h5>
                 <ul className="space-y-2">
-                  {col.items.map(item => <li key={item} className="text-xs hover:text-terracotta transition-colors cursor-pointer font-bold">{item}</li>)}
+                  {col.items.map(item => (
+                    <li key={item.name}>
+                      <Link to={item.link} className="text-xs hover:text-terracotta transition-colors cursor-pointer font-bold">{item.name}</Link>
+                    </li>
+                  ))}
                 </ul>
               </div>
             ))}

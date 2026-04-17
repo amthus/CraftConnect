@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, X } from 'lucide-react';
-import { Nav, ProductCard, CartSidebar, FloatingWhatsApp } from './SharedComponents';
+import { Nav, ProductCard, CartSidebar, WishlistSidebar, FloatingWhatsApp, FloatingSupport } from './SharedComponents';
 import { PRODUCTS, CATEGORIES } from '../lib/constants';
 import { Button } from '@/components/ui/button';
 
@@ -21,6 +21,8 @@ export default function MarketplacePage() {
     <div className="min-h-screen bg-sand/30 font-sans pb-32">
       <Nav />
       <CartSidebar />
+      <WishlistSidebar />
+      <FloatingSupport />
       <FloatingWhatsApp />
 
       <header className="pt-40 pb-20 px-4 md:px-16 bg-white border-b border-terracotta/5">

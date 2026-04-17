@@ -44,6 +44,7 @@ export interface Product {
   category: string;
   soulOfObject: string;
   textureLabel: string;
+  stock: number;
 }
 
 export const ARTISANS: Artisan[] = [
@@ -101,7 +102,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/seed/pottery/800/1000',
     category: 'Céramique',
     soulOfObject: "Modelée avec la terre rouge du Mono, cette pièce porte les empreintes de générations de potières.",
-    textureLabel: "Grain de terre cuite"
+    textureLabel: "Grain de terre cuite",
+    stock: 5
   },
   {
     id: '2',
@@ -112,7 +114,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/seed/fabric/800/1000',
     category: 'Textile',
     soulOfObject: "Un tissage complexe aux motifs symbolisant la force et la sagesse des rois du Danhomè.",
-    textureLabel: "Fibres de coton naturel"
+    textureLabel: "Fibres de coton naturel",
+    stock: 0
   },
   {
     id: '3',
@@ -123,7 +126,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/seed/bronze/800/1000',
     category: 'Sculpture',
     soulOfObject: "La cire perdue capturant l'esprit des ancêtres sur la côte des esclaves.",
-    textureLabel: "Patine de bronze"
+    textureLabel: "Patine de bronze",
+    stock: 2
   },
   {
     id: '4',
@@ -134,7 +138,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/seed/wood/800/1000',
     category: 'Mobilier',
     soulOfObject: "Taillée dans une pièce unique dIroko centenaire, représentant les liens familiaux.",
-    textureLabel: "Bois massif nervuré"
+    textureLabel: "Bois massif nervuré",
+    stock: 1
   },
   {
     id: '5',
@@ -145,7 +150,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/seed/jewelry/800/1000',
     category: 'Joaillerie',
     soulOfObject: "Enfilage de perles de verre anciennes et pierres semi-précieuses du Nord Bénin.",
-    textureLabel: "Éclats de verre poli"
+    textureLabel: "Éclats de verre poli",
+    stock: 0
   },
   {
     id: '6',
@@ -156,7 +162,8 @@ export const PRODUCTS: Product[] = [
     image: 'https://picsum.photos/seed/mask/800/1000',
     category: 'Sculpture',
     soulOfObject: "Masque cérémoniel honorant les mères ancestrales, sculpté dans le bois de fromager.",
-    textureLabel: "Peinture naturelle mate"
+    textureLabel: "Peinture naturelle mate",
+    stock: 3
   }
 ];
 
