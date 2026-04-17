@@ -328,10 +328,12 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         
         <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
           <Dialog>
-            <DialogTrigger asChild>
-              <Button size="icon" className="rounded-full bg-white text-terracotta hover:bg-terracotta hover:text-white shadow-xl">
-                <Eye size={18} />
-              </Button>
+            <DialogTrigger 
+              render={
+                <Button size="icon" className="rounded-full bg-white text-terracotta hover:bg-terracotta hover:text-white shadow-xl" />
+              }
+            >
+              <Eye size={18} />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[800px] glass p-0 overflow-hidden border-terracotta/20">
               <div className="flex flex-col md:flex-row">
@@ -377,10 +379,12 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
         <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black/80 to-transparent">
           <Dialog>
-             <DialogTrigger asChild>
-               <Button variant="outline" className="w-full glass text-white border-white/20 hover:bg-white/20 text-[10px] uppercase font-black tracking-widest">
-                 L'Âme de l'Objet
-               </Button>
+             <DialogTrigger 
+               render={
+                 <Button variant="outline" className="w-full glass text-white border-white/20 hover:bg-white/20 text-[10px] uppercase font-black tracking-widest" />
+               }
+             >
+               L'Âme de l'Objet
              </DialogTrigger>
              <DialogContent className="sm:max-w-[700px] glass border-terracotta/20">
                 <DialogHeader>

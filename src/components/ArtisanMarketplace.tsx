@@ -145,10 +145,12 @@ export default function ArtisanMarketplace() {
               <div><p className="font-bold text-lg tracking-tight">Directeur Artistique</p><p className="text-xs text-muted-foreground uppercase font-black opacity-60">Accompagnement Personnalisé</p></div>
             </div>
             <Dialog>
-              <DialogTrigger asChild>
-                <Button size="lg" className="bg-black text-white rounded-full px-12 h-16 text-xs uppercase font-black tracking-widest group shadow-2xl">
-                  Initier un Projet <PenTool className="ml-3 group-hover:rotate-12 transition-transform" />
-                </Button>
+              <DialogTrigger 
+                render={
+                  <Button size="lg" className="bg-black text-white rounded-full px-12 h-16 text-xs uppercase font-black tracking-widest group shadow-2xl" />
+                }
+              >
+                Initier un Projet <PenTool className="ml-3 group-hover:rotate-12 transition-transform" />
               </DialogTrigger>
               <DialogContent className="glass">
                 <DialogHeader>
