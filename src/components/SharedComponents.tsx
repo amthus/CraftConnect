@@ -21,7 +21,12 @@ import {
   Eye,
   Heart,
   ChevronRight,
-  Instagram
+  Instagram,
+  Scroll,
+  LogIn,
+  Loader2,
+  Send,
+  Sparkles
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +42,7 @@ import {
 import { useCart } from '../lib/CartContext';
 import { useAuth } from '../lib/AuthContext';
 import { ARTISANS, Product, COUNTRIES, PRODUCTS } from '../lib/constants';
+import { chatWithConcierge } from '../services/geminiService';
 
 const getInitials = (name: string) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -51,97 +57,107 @@ export const Nav = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[100] px-4 md:px-16 py-4 flex justify-between items-center transition-all duration-700 ${
-      isScrolled ? 'glass shadow-2xl bg-white/70 py-3' : 'sm:bg-transparent sm:backdrop-blur-none py-6'
-    }`}>
-      <Link to="/" className="text-xl md:text-2xl font-heading tracking-tight text-terracotta flex items-center gap-2 cursor-pointer">
-        <span className="font-black">BÉNIN</span>
-        <span className="font-light text-foreground">ARTISAN</span>
-      </Link>
-      
-      <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs uppercase tracking-[0.2em] font-bold">
-        <Link to="/marketplace" className="hover:text-terracotta transition-colors flex items-center gap-2">
-          <Maximize2 size={14} /> La Galerie
-        </Link>
-        <Link to="/#artisans" className="hover:text-terracotta transition-colors flex items-center gap-2">
-          <Users size={14} /> Nos Artisans
-        </Link>
-        <Link to="/#sur-mesure" className="hover:text-terracotta transition-colors flex items-center gap-2">
-          <Zap size={14} /> Sur Mesure
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-[100] px-4 md:px-12 flex justify-between items-center transition-all duration-500 ${
+        isScrolled 
+          ? 'glass shadow-xl bg-white/80 py-3' 
+          : 'bg-white/10 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none py-5 md:py-8'
+      }`}>
+        <Link to="/" className="text-lg md:text-xl font-heading tracking-tight text-terracotta flex items-center gap-2 cursor-pointer">
+          <span className="font-black">BÉNIN</span>
+          <span className="font-light text-foreground">ARTISAN</span>
         </Link>
         
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsWishlistOpen(true)}
-            className="relative group/wish"
-          >
-            <Heart size={20} className={wishlistItems.length > 0 ? 'text-terracotta fill-terracotta' : 'group-hover/wish:text-terracotta transition-colors'} />
-            <AnimatePresence>
-              {wishlistItems.length > 0 && (
-                <motion.span 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 h-4 w-4 bg-terracotta text-white rounded-full text-[10px] flex items-center justify-center font-bold"
-                >
-                  {wishlistItems.length}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </Button>
-
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsBagOpen(true)}
-            className="relative group/bag"
-          >
-            <ShoppingBag size={20} className="group-hover/bag:text-terracotta transition-colors" />
-            <AnimatePresence>
-              {bagItems.length > 0 && (
-                <motion.span 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 h-4 w-4 bg-terracotta text-white rounded-full text-[10px] flex items-center justify-center font-bold"
-                >
-                  {bagItems.length}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-3 pl-4 border-l border-terracotta/10">
+        <div className="hidden md:flex items-center gap-5 lg:gap-7 text-[10px] uppercase tracking-[0.2em] font-bold">
+          <Link to="/marketplace" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
+            <Maximize2 size={12} /> La Galerie
+          </Link>
+          <Link to="/#artisans" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
+            <Users size={12} /> Nos Artisans
+          </Link>
+          <Link to="/#sur-mesure" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
+            <Zap size={12} /> Sur Mesure
+          </Link>
+          
           {user && (
-            <div className="text-right hidden sm:block">
-              <p className="text-[11px] font-bold leading-none">{user.name}</p>
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsWishlistOpen(true)}
+                className="relative group/wish h-9 w-9"
+              >
+                <Heart size={18} className={wishlistItems.length > 0 ? 'text-terracotta fill-terracotta' : 'group-hover/wish:text-terracotta transition-colors'} />
+                <AnimatePresence>
+                  {wishlistItems.length > 0 && (
+                    <motion.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 bg-terracotta text-white rounded-full text-[9px] flex items-center justify-center font-bold"
+                    >
+                      {wishlistItems.length}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Button>
+    
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsBagOpen(true)}
+                className="relative group/bag h-9 w-9"
+              >
+                <ShoppingBag size={18} className="group-hover/bag:text-terracotta transition-colors" />
+                <AnimatePresence>
+                  {bagItems.length > 0 && (
+                    <motion.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 bg-terracotta text-white rounded-full text-[9px] flex items-center justify-center font-bold"
+                    >
+                      {bagItems.length}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Button>
             </div>
           )}
-          <Avatar className="h-9 w-9 border-2 border-terracotta/20 shadow-inner group cursor-pointer hover:border-terracotta transition-colors">
-            {user?.avatar && <AvatarImage src={user.avatar} />}
-            <AvatarFallback className="bg-sand text-terracotta text-[10px] font-black group-hover:bg-terracotta group-hover:text-white transition-colors">
-              {user ? getInitials(user.name) : <Users size={14} />}
-            </AvatarFallback>
-          </Avatar>
+   
+          <Link 
+            to={user ? (user.role === 'admin' ? '/admin' : '/dashboard') : '/login'} 
+            className="flex items-center gap-2 pl-4 border-l border-terracotta/10 group cursor-pointer"
+          >
+            {user && (
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] font-bold leading-none group-hover:text-terracotta transition-colors">{user.name}</p>
+              </div>
+            )}
+            <Avatar className="h-8 w-8 border-2 border-terracotta/20 shadow-inner hover:border-terracotta transition-colors">
+              {user?.avatar && <AvatarImage src={user.avatar} />}
+              <AvatarFallback className="bg-sand text-terracotta text-[9px] font-black group-hover:bg-terracotta group-hover:text-white transition-colors">
+                {user ? getInitials(user.name) : <Users size={12} />}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
         </div>
-      </div>
 
-      <button 
-        onClick={() => setIsMenuOpen(true)}
-        className="md:hidden text-foreground hover:text-terracotta transition-colors"
-      >
-        <Menu size={24} />
-      </button>
+        <button 
+          onClick={() => setIsMenuOpen(true)}
+          className="md:hidden p-2 -mr-2 text-foreground hover:text-terracotta transition-colors flex items-center justify-center"
+          aria-label="Menu"
+        >
+          <Menu size={24} />
+        </button>
+      </nav>
 
       <AnimatePresence>
         {isMenuOpen && (
@@ -158,7 +174,7 @@ export const Nav = () => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 z-[200] w-[80%] max-w-sm bg-white flex flex-col p-8 md:p-12 overflow-y-auto shadow-2xl"
+              className="fixed top-0 left-0 bottom-0 z-[200] w-[85%] max-w-sm bg-white flex flex-col p-8 md:p-12 overflow-y-auto shadow-2xl"
             >
               <div className="flex justify-between items-center mb-16">
                 <div className="text-xl font-heading tracking-tight text-terracotta">
@@ -179,12 +195,53 @@ export const Nav = () => {
                 <Link to="/#sur-mesure" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Zap size={24} /> Sur Mesure
                 </Link>
+                <Link to="/history" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
+                  <Scroll size={24} /> Notre Histoire
+                </Link>
+                {user && (
+                  <>
+                    <button onClick={() => { setIsMenuOpen(false); setIsWishlistOpen(true); }} className="text-2xl font-heading flex items-center justify-between hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4 text-left w-full">
+                      <div className="flex items-center gap-4"><Heart size={24} /> Ma Wishlist</div>
+                      {wishlistItems.length > 0 && <Badge className="bg-terracotta text-white">{wishlistItems.length}</Badge>}
+                    </button>
+                    <button onClick={() => { setIsMenuOpen(false); setIsBagOpen(true); }} className="text-2xl font-heading flex items-center justify-between hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4 text-left w-full">
+                      <div className="flex items-center gap-4"><ShoppingBag size={24} /> Mon Panier</div>
+                      {bagItems.length > 0 && <Badge className="bg-terracotta text-white">{bagItems.length}</Badge>}
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className="mt-auto pt-10">
+                <Link 
+                  to={user ? (user.role === 'admin' ? '/admin' : '/dashboard') : '/login'}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full flex items-center justify-between p-6 bg-sand/50 rounded-3xl border border-terracotta/10 group active:scale-95 transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-12 w-12 border-2 border-terracotta/20">
+                      {user?.avatar && <AvatarImage src={user.avatar} />}
+                      <AvatarFallback className="bg-terracotta text-white font-black">
+                        {user ? getInitials(user.name) : <LogIn size={20} />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="text-left">
+                      <p className="text-[10px] uppercase font-black tracking-[0.2em] opacity-40">
+                        {user ? 'Mon Espace' : 'Bienvenue'}
+                      </p>
+                      <p className={`${user ? 'text-lg' : 'text-sm'} font-heading tracking-tight text-foreground`}>
+                        {user ? user.name : "S'identifier"}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight size={20} className="text-terracotta group-hover:translate-x-2 transition-transform" />
+                </Link>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 };
 
@@ -408,146 +465,115 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   return (
     <motion.div 
       whileHover={{ y: -8 }}
-      className="group relative flex flex-col p-4 bg-white/40 glass rounded-3xl transition-all duration-300 hover:shadow-2xl hover:shadow-terracotta/5 border border-transparent hover:border-terracotta/10"
+      className="group relative flex flex-col p-3 md:p-4 bg-white/40 glass rounded-3xl transition-all duration-300 hover:shadow-2xl hover:shadow-terracotta/5 border border-transparent hover:border-terracotta/10"
     >
-      <Dialog>
-        <DialogTrigger 
-          nativeButton={false}
-          render={<div className="relative aspect-[3/4] overflow-hidden rounded-2xl mb-6 shadow-xl border border-terracotta/5 cursor-pointer group/card" />}
-        >
-          <div 
-            className="w-full h-full relative overflow-hidden"
-            onMouseEnter={() => setIsZooming(true)}
-            onMouseLeave={() => setIsZooming(false)}
+      <div className="relative w-full aspect-[3/4] mb-4 md:mb-6">
+        <Dialog>
+          <DialogTrigger 
+            nativeButton={true}
+            render={<button className="relative w-full h-full overflow-hidden rounded-2xl shadow-xl border border-terracotta/5 cursor-pointer group/card focus:outline-none" />}
           >
-            {!imageError ? (
-              <motion.img 
-                src={product.image} 
-                alt={product.name} 
-                onError={() => setImageError(true)}
-                animate={{ scale: isZooming ? 1.05 : 1 }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className={`h-full w-full object-cover origin-center ${product.stock === 0 ? 'grayscale opacity-60' : ''}`}
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-sand/30 font-heading text-4xl text-terracotta/20 select-none">
-                {getInitials(product.name)}
-              </div>
-            )}
-            <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors duration-500" />
-            {product.stock === 0 ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-black/80 backdrop-blur-xl px-8 py-3 rounded-full text-[11px] uppercase font-black tracking-[0.25em] text-white border border-terracotta/30 shadow-[0_20px_50px_rgba(183,110,74,0.3)] ring-1 ring-white/10">
-                  <span className="flex items-center gap-2">
-                    <X size={14} className="text-terracotta" />
-                    Hélas, Vendu
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500">
-                <div className="glass px-6 py-3 rounded-full text-[10px] uppercase font-black tracking-[0.2em] text-white">Découvrir l'âme</div>
-              </div>
-            )}
-          </div>
-        </DialogTrigger>
-
-        <div className="absolute top-8 right-8 flex flex-col gap-2 z-10 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
-           <Button 
-            onClick={(e) => { e.stopPropagation(); addToWishlist(product); }}
-            size="icon" 
-            className={`rounded-full shadow-xl transition-all ${itemInWishlist ? 'bg-terracotta text-white' : 'bg-white text-terracotta hover:bg-terracotta hover:text-white'}`}
-          >
-            <Heart size={18} fill={itemInWishlist ? "currentColor" : "none"} />
-          </Button>
-
-          <Button 
-            onClick={(e) => { e.stopPropagation(); if (product.stock > 0) addToBag(product); }}
-            size="icon" 
-            disabled={product.stock === 0}
-            className={`rounded-full shadow-xl ${product.stock === 0 ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed' : 'bg-white text-terracotta hover:bg-terracotta hover:text-white'}`}
-          >
-            <ShoppingBag size={18} />
-          </Button>
-
-          <Dialog>
-            <DialogTrigger 
-              render={<Button size="icon" className="rounded-full bg-white text-terracotta hover:bg-terracotta hover:text-white shadow-xl" />}
+            <div 
+              className="w-full h-full relative"
+              onMouseEnter={() => setIsZooming(true)}
+              onMouseLeave={() => setIsZooming(false)}
             >
-              <Share2 size={18} />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[300px] glass p-6 border-terracotta/20">
-              <DialogHeader>
-                <DialogTitle className="text-xs font-black uppercase tracking-widest text-center text-terracotta">Partager cette œuvre</DialogTitle>
-              </DialogHeader>
-              <div className="flex justify-center gap-4 py-6">
-                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:text-[#1877F2] hover:bg-[#1877F2]/10"><Facebook size={24} /></Button>
-                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/10"><Twitter size={24} /></Button>
-                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:text-[#E60023] hover:bg-[#E60023]/10"><Instagram size={24} /></Button>
+              {!imageError ? (
+                <motion.img 
+                  src={product.image} 
+                  alt={product.name} 
+                  onError={() => setImageError(true)}
+                  animate={{ scale: isZooming ? 1.05 : 1 }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  className={`h-full w-full object-cover origin-center ${product.stock === 0 ? 'grayscale opacity-60' : ''}`}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-sand/30 font-heading text-4xl text-terracotta/20 select-none">
+                  {getInitials(product.name)}
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors duration-500" />
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-white/90 backdrop-blur-md text-terracotta text-[8px] md:text-[9px] px-2 py-0.5 uppercase tracking-widest border border-terracotta/10">{product.category}</Badge>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <DialogContent className="sm:max-w-[900px] glass p-0 overflow-hidden border-terracotta/20 font-sans">
-            <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
-                <div className="md:w-1/2 aspect-square md:aspect-auto relative bg-sand/20">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                  <div className="absolute top-6 left-6">
-                    <Badge className="bg-white/80 backdrop-blur-md text-terracotta px-4 py-1 uppercase tracking-widest">{product.category}</Badge>
+              {product.stock === 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-black/80 backdrop-blur-xl px-6 md:px-8 py-2 md:py-3 rounded-full text-[9px] md:text-[11px] uppercase font-black tracking-[0.25em] text-white border border-terracotta/30 shadow-lg">
+                    <span className="flex items-center gap-2">
+                      <X size={12} className="text-terracotta" />
+                      Indisponible
+                    </span>
                   </div>
                 </div>
-                <div className="md:w-1/2 p-8 md:p-12 space-y-8 overflow-y-auto">
-                  <div className="flex justify-between items-start">
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500">
+                  <div className="glass px-6 py-3 rounded-full text-[10px] uppercase font-black tracking-[0.2em] text-white">Consulter</div>
+                </div>
+              )}
+            </div>
+          </DialogTrigger>
+
+          <DialogContent className="w-[95vw] sm:max-w-[900px] glass p-0 overflow-hidden border-terracotta/20 font-sans max-h-[95vh] sm:max-h-[90vh]">
+            <div className="flex flex-col md:flex-row h-full overflow-y-auto md:overflow-hidden">
+                <div className="md:w-1/2 aspect-[4/3] md:aspect-auto relative bg-sand/20 shrink-0">
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                  <div className="absolute top-4 left-4 md:top-6 md:left-6">
+                    <Badge className="bg-white/80 backdrop-blur-md text-terracotta px-3 py-0.5 md:px-4 md:py-1 uppercase text-[10px] md:text-xs tracking-widest">{product.category}</Badge>
+                  </div>
+                </div>
+                <div className="md:w-1/2 p-6 md:p-12 space-y-6 md:space-y-8 overflow-y-auto">
+                  <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1">
-                      <h2 className="text-4xl md:text-5xl font-heading leading-tight">{product.name}</h2>
-                      <p className="text-xs text-muted-foreground flex items-center gap-2 uppercase tracking-[0.2em] font-bold"><MapPin size={14} className="text-terracotta" /> {product.origin}</p>
+                      <h2 className="text-2xl md:text-5xl font-heading leading-tight">{product.name}</h2>
+                      <p className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-2 uppercase tracking-[0.2em] font-bold">
+                        <MapPin size={12} className="text-terracotta" /> {product.origin}
+                      </p>
                     </div>
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       onClick={() => addToWishlist(product)}
-                      className={`h-12 w-12 rounded-full ${itemInWishlist ? 'text-terracotta bg-terracotta/10' : 'hover:bg-terracotta/5'}`}
+                      className={`h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0 ${itemInWishlist ? 'text-terracotta bg-terracotta/10' : 'hover:bg-terracotta/5'}`}
                     >
-                      <Heart size={28} fill={itemInWishlist ? "currentColor" : "none"} />
+                      <Heart size={20} className="md:w-7 md:h-7" fill={itemInWishlist ? "currentColor" : "none"} />
                     </Button>
                   </div>
                   
-                  <div className="space-y-3">
-                    <p className="text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">L'Âme de l'Objet</p>
-                    <p className="font-serif italic text-xl leading-relaxed text-muted-foreground border-l-2 border-terracotta/20 pl-6">"{product.soulOfObject}"</p>
+                  <div className="space-y-2 md:space-y-3">
+                    <p className="text-[9px] md:text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">L'Âme de l'Objet</p>
+                    <p className="font-serif italic text-base md:text-xl leading-relaxed text-muted-foreground border-l-2 border-terracotta/20 pl-4 md:pl-6">"{product.soulOfObject}"</p>
                   </div>
 
-                  <div className="space-y-3">
-                    <p className="text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">Détails de Texture</p>
+                  <div className="space-y-2 md:space-y-3">
+                    <p className="text-[9px] md:text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">Détails de Texture</p>
                     <TextureVisualizer image={product.image} label={product.textureLabel} />
                   </div>
 
-                  <div className="flex items-center gap-4 p-5 glass border border-terracotta/10 rounded-2xl">
-                    <Avatar className="h-14 w-14 border border-terracotta/20 shadow-inner">
+                  <div className="flex items-center gap-3 md:gap-4 p-4 md:p-5 glass border border-terracotta/10 rounded-2xl">
+                    <Avatar className="h-10 w-10 md:h-14 md:w-14 border border-terracotta/20 shadow-inner">
                       <AvatarImage src={artisan.image} />
                       <AvatarFallback>{artisan.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="text-[9px] uppercase font-black opacity-40 tracking-wider">Maître Artisan</p>
-                      <p className="font-bold text-lg">{artisan.name}</p>
-                      <p className="text-xs text-muted-foreground font-serif italic">{artisan.location}</p>
+                      <p className="text-[8px] md:text-[9px] uppercase font-black opacity-40 tracking-wider">Maître Artisan</p>
+                      <p className="font-bold text-sm md:text-lg">{artisan.name}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground font-serif italic">{artisan.location}</p>
                     </div>
-                    <Link to={`/#artisans`} onClick={(e) => { /* Close dialog maybe? */ }}>
-                       <Button variant="ghost" size="icon" className="rounded-full"><ChevronRight size={20}/></Button>
+                    <Link to={`/#artisans`}>
+                       <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full"><ChevronRight size={16}/></Button>
                     </Link>
                   </div>
 
-                  <div className="flex items-center justify-between gap-6 pt-4 border-t border-terracotta/10">
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase font-black opacity-40">Prix d'acquisition</p>
-                      <span className="text-4xl font-heading text-terracotta">{product.price}€</span>
+                  <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 md:gap-6 pt-4 border-t border-terracotta/10">
+                    <div className="text-center sm:text-left space-y-0.5">
+                      <p className="text-[8px] md:text-[10px] uppercase font-black opacity-40">Prix d'acquisition</p>
+                      <span className="text-2xl md:text-4xl font-heading text-terracotta">{product.price}€</span>
                     </div>
                     <Button 
                       onClick={() => addToBag(product)} 
                       disabled={product.stock === 0}
-                      className={`flex-1 rounded-full h-16 text-xs uppercase font-black tracking-widest shadow-xl transition-all ${
+                      className={`w-full sm:flex-1 rounded-full h-12 md:h-16 text-xs uppercase font-black tracking-widest shadow-xl transition-all active:scale-95 ${
                         product.stock === 0 
                         ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed' 
                         : 'bg-terracotta hover:bg-terracotta/90 text-white shadow-terracotta/20'
@@ -562,25 +588,30 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
                         <p className="text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">Inspirations liées</p>
                         <Link to="/marketplace" className="text-[9px] uppercase font-bold text-muted-foreground hover:text-terracotta transition-colors">Tout voir</Link>
                      </div>
-                     <div className="grid grid-cols-2 gap-6">
-                        {PRODUCTS.filter(item => item.id !== product.id && (item.category === product.category || item.artisanId === product.artisanId)).slice(0, 2).map((item, idx) => (
+                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        {PRODUCTS.filter(item => item.id !== product.id && (item.category === product.category || item.artisanId === product.artisanId)).slice(0, 3).map((item, idx) => (
                           <motion.div 
                             key={item.id} 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 0.1 * idx }}
-                            className="group/rel relative flex flex-col gap-3 cursor-pointer"
+                            className="group/rel relative flex flex-col gap-2 cursor-pointer bg-sand/20 rounded-2xl p-2 border border-transparent hover:border-terracotta/10 hover:bg-white transition-all shadow-sm hover:shadow-md"
                           >
-                             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-sm border border-terracotta/5">
-                                <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover/rel:scale-110" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/rel:opacity-100 transition-opacity duration-500" />
-                                <div className="absolute bottom-3 left-3 right-3 translate-y-4 opacity-0 group-hover/rel:translate-y-0 group-hover/rel:opacity-100 transition-all duration-500">
-                                   <Button variant="secondary" className="w-full bg-white/90 backdrop-blur-md text-[9px] h-8 rounded-full font-black uppercase tracking-wider text-terracotta hover:bg-white">Aperçu</Button>
+                             <div className="relative aspect-square rounded-xl overflow-hidden">
+                                <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover/rel:scale-110" />
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/rel:opacity-100 transition-opacity" />
+                                <div className="absolute top-2 right-2 flex gap-1 translate-x-4 opacity-0 group-hover/rel:translate-x-0 group-hover/rel:opacity-100 transition-all">
+                                   <div className="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                                      <Eye size={12} className="text-terracotta" />
+                                   </div>
                                 </div>
                              </div>
-                             <div className="px-1">
-                                <p className="text-[10px] font-bold text-foreground mb-0.5 truncate">{item.name}</p>
-                                <p className="text-[9px] text-terracotta font-medium tracking-tight">{item.price}€</p>
+                             <div className="px-1 py-1">
+                                <p className="text-[9px] font-bold text-foreground mb-0.5 line-clamp-1">{item.name}</p>
+                                <div className="flex justify-between items-center">
+                                   <p className="text-[9px] text-terracotta font-black tracking-tight">{item.price}€</p>
+                                   <Badge variant="ghost" className="h-3 text-[7px] px-1 uppercase opacity-40">{item.origin.split(',')[0]}</Badge>
+                                </div>
                              </div>
                           </motion.div>
                         ))}
@@ -593,62 +624,190 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
                   </div>
                 </div>
               </div>
-        </DialogContent>
-      </Dialog>
-      
-      <div className="mt-6">
-        <div className="flex justify-between items-center mb-3">
-          <Badge variant="outline" className="text-[10px] tracking-widest text-terracotta border-terracotta/30 uppercase px-3">{product.category}</Badge>
-          <span className="font-heading text-2xl text-terracotta/80">{product.price}€</span>
+          </DialogContent>
+        </Dialog>
+
+        {/* Action Overlay Buttons */}
+        <div className="absolute top-6 right-6 flex flex-col gap-2 z-10 md:translate-x-12 opacity-100 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500">
+           <Button 
+            onClick={(e) => { e.stopPropagation(); addToWishlist(product); }}
+            size="icon" 
+            className={`rounded-full h-8 w-8 md:h-10 md:w-10 shadow-xl transition-all ${itemInWishlist ? 'bg-terracotta text-white' : 'bg-white/90 backdrop-blur-md text-terracotta hover:bg-terracotta hover:text-white'}`}
+          >
+            <Heart size={16} className="md:w-[18px] md:h-[18px]" fill={itemInWishlist ? "currentColor" : "none"} />
+          </Button>
+
+          <Button 
+            onClick={(e) => { e.stopPropagation(); if (product.stock > 0) addToBag(product); }}
+            size="icon" 
+            disabled={product.stock === 0}
+            className={`rounded-full h-8 w-8 md:h-10 md:w-10 shadow-xl ${product.stock === 0 ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed' : 'bg-white/90 backdrop-blur-md text-terracotta hover:bg-terracotta hover:text-white'}`}
+          >
+            <ShoppingBag size={16} className="md:w-[18px] md:h-[18px]" />
+          </Button>
+
+          <Dialog>
+            <DialogTrigger 
+              nativeButton={true}
+              render={
+                <button className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-white/90 backdrop-blur-md text-terracotta hover:bg-terracotta hover:text-white shadow-xl flex items-center justify-center transition-all focus:outline-none">
+                  <Share2 size={18} />
+                </button>
+              }
+            />
+            <DialogContent className="sm:max-w-[300px] glass p-6 border-terracotta/20">
+              <DialogHeader>
+                <DialogTitle className="text-xs font-black uppercase tracking-widest text-center text-terracotta">Partager cette œuvre</DialogTitle>
+              </DialogHeader>
+              <div className="flex justify-center gap-4 py-6">
+                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:text-[#1877F2] hover:bg-[#1877F2]/10"><Facebook size={24} /></Button>
+                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/10"><Twitter size={24} /></Button>
+                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:text-[#E60023] hover:bg-[#E60023]/10"><Instagram size={24} /></Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
-        <h3 className="font-heading text-2xl group-hover:text-terracotta transition-colors mb-2">{product.name}</h3>
-        <p className="text-xs text-muted-foreground flex items-center gap-2 font-sans font-medium tracking-tight">
-          <MapPin size={14} className="text-terracotta/60" /> {product.origin}
+      </div>
+      
+      <div className="mt-2 text-left">
+        <div className="flex justify-between items-center mb-1">
+          <Badge variant="outline" className="text-[7px] md:text-[9px] tracking-widest text-terracotta border-terracotta/30 uppercase px-2 py-0.5">{product.category}</Badge>
+          <span className="font-heading text-lg md:text-xl text-terracotta/80">{product.price}€</span>
+        </div>
+        <h3 className="font-heading text-lg md:text-xl group-hover:text-terracotta transition-colors mb-1 line-clamp-1">{product.name}</h3>
+        <p className="text-[10px] md:text-[11px] text-muted-foreground flex items-center gap-1.5 font-sans font-medium tracking-tight">
+          <MapPin size={10} className="text-terracotta/60" /> {product.origin}
         </p>
       </div>
     </motion.div>
   );
 };
 
-export const FloatingSupport = () => (
-  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="fixed bottom-28 right-8 z-50">
-    <Dialog>
-      <DialogTrigger render={
-        <Button className="h-16 w-16 rounded-full bg-terracotta text-white shadow-2xl p-0 flex items-center justify-center hover:bg-terracotta/90">
-          <AlertCircle size={32} />
-        </Button>
-      } />
-      <DialogContent className="sm:max-w-[400px] glass p-8 border-terracotta/20 font-sans">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-heading text-terracotta">Conciergerie en Direct</DialogTitle>
-        </DialogHeader>
-        <div className="py-6 space-y-6">
-          <div className="flex items-center gap-4 p-4 bg-terracotta/5 rounded-2xl border border-terracotta/10">
-            <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-sm font-medium">Un expert est disponible pour vous conseiller.</p>
-          </div>
-          <div className="space-y-4">
-            <p className="text-[10px] uppercase font-black text-terracotta tracking-widest opacity-60">Sujets fréquents</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="text-[10px] rounded-xl h-10">Authentification</Button>
-              <Button variant="outline" className="text-[10px] rounded-xl h-10">Logistique France</Button>
-              <Button variant="outline" className="text-[10px] rounded-xl h-10">Sur Mesure</Button>
-              <Button variant="outline" className="text-[10px] rounded-xl h-10">Paiement</Button>
-            </div>
-          </div>
-          <Button className="w-full bg-terracotta rounded-xl h-14 uppercase font-black text-xs tracking-widest">Lancer le chat</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  </motion.div>
-);
+export const FloatingSupport = () => {
+  const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
+    { role: 'model', text: "Bienvenue dans notre galerie d'exception. Je suis votre concierge dédiée. Comment puis-je vous accompagner aujourd'hui ?" }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-export const FloatingWhatsApp = () => (
-  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="fixed bottom-8 right-8 z-50">
-    <a href="https://wa.me/22900000000" target="_blank" rel="noopener noreferrer">
-      <Button className="h-16 w-16 rounded-full bg-[#25D366] text-white shadow-2xl p-0 flex items-center justify-center hover:bg-[#128C7E]">
-        <MessageCircle size={32} />
-      </Button>
-    </a>
-  </motion.div>
-);
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMsg = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+    setIsLoading(true);
+
+    const history = messages.map(m => ({
+      role: m.role,
+      parts: [{ text: m.text }]
+    }));
+
+    const response = await chatWithConcierge(userMsg, history);
+    setMessages(prev => [...prev, { role: 'model', text: response }]);
+    setIsLoading(false);
+  };
+
+  const handleQuickAction = (text: string) => {
+    setInput(text);
+  };
+
+  return (
+    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="fixed bottom-6 right-6 z-50">
+      <Dialog>
+        <DialogTrigger 
+          nativeButton={true}
+          render={
+            <button className="h-14 w-14 rounded-full bg-terracotta text-white shadow-xl flex items-center justify-center hover:bg-terracotta/90 focus:outline-none transition-all active:scale-90 group relative">
+              <MessageCircle size={28} className="group-hover:rotate-12 transition-transform" />
+              <div className="absolute -top-1 -right-1 h-3 w-3 bg-emerald-500 rounded-full border-2 border-white" />
+            </button>
+        } />
+        <DialogContent className="sm:max-w-[420px] glass p-0 border-terracotta/20 font-sans h-[600px] flex flex-col overflow-hidden">
+          <DialogHeader className="p-6 border-b border-terracotta/10 bg-terracotta/5">
+            <DialogTitle className="text-xl font-heading text-terracotta flex items-center gap-3">
+              <Sparkles className="text-terracotta animate-pulse" size={20} />
+              Conciergerie en Direct
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
+            {messages.map((m, i) => (
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] leading-relaxed shadow-sm ${
+                  m.role === 'user' 
+                  ? 'bg-terracotta text-white rounded-tr-none' 
+                  : 'bg-white text-foreground border border-terracotta/10 rounded-tl-none'
+                }`}>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-terracotta/10 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
+                  <Loader2 className="animate-spin text-terracotta" size={12} />
+                  <span className="text-[10px] text-muted-foreground">La Concierge prépare sa réponse...</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="p-4 border-t border-terracotta/10 bg-sand/20 space-y-4">
+            {messages.length < 3 && (
+              <div className="flex flex-wrap gap-2">
+                {['Authentification', 'Sur Mesure', 'Logistique'].map(tag => (
+                  <button 
+                    key={tag}
+                    onClick={() => handleQuickAction(tag)}
+                    className="text-[9px] px-3 py-1 bg-white hover:bg-terracotta hover:text-white border border-terracotta/10 rounded-full transition-all text-muted-foreground"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Posez votre question à notre expert..."
+                className="flex-1 bg-white border-none rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-terracotta outline-none shadow-inner"
+              />
+              <button 
+                onClick={handleSend}
+                disabled={isLoading}
+                className="h-10 w-10 rounded-xl bg-terracotta text-white flex items-center justify-center hover:bg-terracotta/90 transition-all disabled:opacity-50"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+            
+            <div className="flex items-center justify-center gap-4">
+              <div className="h-[1px] bg-terracotta/10 flex-1" />
+              <p className="text-[8px] uppercase tracking-widest text-muted-foreground opacity-60">ou</p>
+              <div className="h-[1px] bg-terracotta/10 flex-1" />
+            </div>
+
+            <a href="https://wa.me/22900000000" target="_blank" rel="noopener noreferrer" className="block">
+              <Button className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl h-10 uppercase font-black text-[9px] tracking-widest active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
+                <MessageCircle size={16} />
+                WhatsApp Direct
+              </Button>
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+};

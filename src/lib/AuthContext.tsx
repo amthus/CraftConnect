@@ -1,35 +1,54 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface User {
   id: string;
   name: string;
   email: string;
+  role: 'client' | 'admin';
   avatar?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: () => void;
+  token: string | null;
+  login: (token: string, user: User) => void;
   logout: () => void;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = () => {
-    setUser({
-      id: 'user-1',
-      name: 'Aurelien Zankou',
-      email: 'aurelien.zankou@example.com',
-    });
+  useEffect(() => {
+    const savedToken = localStorage.getItem('benin_artisan_token');
+    const savedUser = localStorage.getItem('benin_artisan_user');
+    if (savedToken && savedUser) {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
+    }
+    setIsLoading(false);
+  }, []);
+
+  const login = (token: string, user: User) => {
+    setToken(token);
+    setUser(user);
+    localStorage.setItem('benin_artisan_token', token);
+    localStorage.setItem('benin_artisan_user', JSON.stringify(user));
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('benin_artisan_token');
+    localStorage.removeItem('benin_artisan_user');
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

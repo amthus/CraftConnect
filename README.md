@@ -1,55 +1,67 @@
-# Benin Artisan Marketplace
+# Bénin Artisan Marketplace
 
 Professional digital gallery dedicated to the promotion and international exportation of Beninese artisan excellence.
 
 ## Project Overview
 
-Benin Artisan Marketplace is a high-end digital platform that connects master artisans from Benin with international collectors. The application focuses on three core pillars: authenticity, transparency, and logistical efficiency. Each product listed is more than an object; it is a piece of cultural heritage accompanied by a digital certificate of authenticity.
+Bénin Artisan Marketplace is a high-end digital platform that connects master artisans from Bénin with international collectors. The application focuses on three core pillars: authenticity, transparency, and logistical efficiency. Each product listed is more than an object; it is a piece of cultural heritage accompanied by a digital certificate of authenticity.
 
 ## Key Features
 
-### Immersive Marketplace
-A curated gallery featuring rare artisan creations. Users can explore various categories such as ceramics, textiles, and sculptures, each presented with high-definition visuals and contextual storytelling.
+### ✨ AI Concierge (Conciergerie Inteligente)
+A next-generation support experience powered by **Google Gemini AI**. Our virtual concierge is an expert on Beninese history and craftsmanship, helping collectors:
+- Understand the technicalities of specific crafts (Kanvô weaving, bronze casting).
+- Inquire about bespoke (Sur Mesure) creation possibilities.
+- Navigate the grouped logistical export system.
+- Authenticate pieces and learn about their cultural origins.
 
-### Soul of the Object
-A unique immersive feature that provides a glimpse into the artisan's workshop. Using high-definition video previews, collectors can witness the creative process and the "geste" behind every piece.
+### 🏺 Immersive Marketplace
+A curated gallery featuring rare artisan creations. Users can explore categories such as ceramics, textiles, and sculptures, each presented with high-definition visuals, macro-textural visualizers, and contextual storytelling.
 
-### Bespoke Creations (Sur Mesure)
-A dedicated service for collectors seeking unique or custom-made objects. This feature facilitates direct collaboration between the user and master artisans to bring a specific vision to life.
+### 🎥 Soul of the Object
+A unique immersive feature that provides a glimpse into the artisan's workshop through video narratives, allowing collectors to witness the "geste" and ancestral techniques behind every piece.
 
-### Digital Authenticity
-Every acquisition is secured with a digital certificate of authenticity. These certificates guarantee the "Made in Benin" origin and the use of ethically sourced local materials.
+### 📜 Digital Authenticity & History
+Every acquisition is secured with a digital certificate of authenticity. The platform also features a rich **History Section** detailing the kings of Dahomey and the evolution of Beninese art forms like the royal cloth.
 
-### Optimized Logistics
-A specialized logistics module manages grouped exports to reduce costs and environmental impact. Users can track the progress of container filling and benefit from reduced shipping fees as the export volume increases.
-
-### Customer Testimonials
-A dedicated section showcasing reviews from international collectors, reinforcing the platform's reputation and the quality of the artisan work.
+### 🚢 Optimized Logistics
+A specialized logistics module manages grouped exports to Europe and the USA. This system reduces environmental impact and costs for the collectors. A real-time tracker allows users to see the filling status of the next export container.
 
 ## Technical Architecture
 
 ### Frontend
-Built with React 19 and TypeScript, utilizing Vite for a fast and modern development experience.
+- **React 19** with **TypeScript** for robust typing.
+- **Vite** for optimized build cycles.
+- **Framer Motion** for sophisticated parallax effects and glassmorphism UI transitions.
 
-### Styling and Animations
-Leverages Tailwind CSS for responsive and polished UI, with Framer Motion for sophisticated transitions and parallax effects.
+### Styling
+- **Tailwind CSS** using a bespoke "Modern African Luxury" design system.
+- Responsive design optimized for **Mobile & Tablet** (Desktop-first precision with fluid mobile adaptations).
 
-### Iconography
-Uses Lucide React for consistent and clear visual communication across the interface.
+### AI Integration
+- **Google GenAI SDK (@google/genai)** integrating the **Gemini 3 Flash** model.
+- Custom state-managed chat interface with context preservation.
 
 ## Installation and Development
 
-To run the project locally, follow these steps:
+To run the project locally:
 
-1. Install dependencies:
+1. **Install dependencies:**
+   ```bash
    npm install
+   ```
 
-2. Start the development server:
+2. **Set up environment variables:**
+   Create a `.env` file and add your Gemini API Key:
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   ```
+
+3. **Start the development server:**
+   ```bash
    npm run dev
-
-3. Build for production:
-   npm run build
+   ```
 
 ## Credits
 
-This platform is a tribute to the master artisans of Benin—from Abomey to Ouidah—whose skill and dedication preserve the cultural soul of the nation.
+This platform is a tribute to the master artisans of Bénin—from Abomey to Ouidah and Porto-Novo—whose skill and dedication preserve the cultural soul of the nation.
