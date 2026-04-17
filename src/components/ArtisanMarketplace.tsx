@@ -18,7 +18,10 @@ import {
   Twitter,
   Instagram,
   Share2,
-  AlertCircle
+  AlertCircle,
+  Users,
+  PenTool,
+  Star
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,11 +92,13 @@ const FloatingWhatsApp = () => (
     whileHover={{ scale: 1.1 }}
     className="fixed bottom-8 right-8 z-50"
   >
-    <Button 
-      className="h-16 w-16 rounded-full bg-[#25D366] text-white shadow-2xl animate-pulse-gold p-0 flex items-center justify-center hover:bg-[#128C7E]"
-    >
-      <MessageCircle size={32} />
-    </Button>
+    <a href="https://wa.me/22900000000" target="_blank" rel="noopener noreferrer">
+      <Button 
+        className="h-16 w-16 rounded-full bg-[#25D366] text-white shadow-2xl animate-pulse-gold p-0 flex items-center justify-center hover:bg-[#128C7E]"
+      >
+        <MessageCircle size={32} />
+      </Button>
+    </a>
   </motion.div>
 );
 
@@ -171,7 +176,16 @@ const TextureVisualizer = ({ image, label }: { image: string, label: string }) =
 };
 
 const ProductCard = ({ product, onAddToBag }: { product: Product, onAddToBag: (p: Product) => void }) => {
-  const [videoError, setVideoError] = useState(false);
+  const [videoError, setVideoError] = useState<{message: string, type: 'network' | 'playback' | null} | null>(null);
+
+  const handleVideoError = (e: any) => {
+    const code = e.target.error?.code;
+    if (code === 2) {
+      setVideoError({ message: "Problème de connexion au flux de l'atelier.", type: 'network' });
+    } else {
+      setVideoError({ message: "Erreur de lecture de l'aperçu digital.", type: 'playback' });
+    }
+  };
 
   return (
     <motion.div 
@@ -210,14 +224,17 @@ const ProductCard = ({ product, onAddToBag }: { product: Product, onAddToBag: (p
                         playsInline 
                         className="w-full h-full object-cover"
                         src="https://assets.mixkit.co/videos/preview/mixkit-working-with-clay-on-a-pottery-wheel-20023-large.mp4"
-                        onError={() => setVideoError(true)}
+                        onError={handleVideoError}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
                         <AlertCircle className="text-terracotta/40 w-12 h-12" />
                         <div>
-                          <p className="text-sm font-bold uppercase tracking-widest text-terracotta">Aperçu indisponible</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">L'atelier de {product.origin} est temporairement hors ligne.</p>
+                          <p className="text-sm font-bold uppercase tracking-widest text-terracotta">
+                            {videoError.type === 'network' ? 'Connexion Interrompue' : 'Erreur de Lecture'}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-1">{videoError.message}</p>
+                          <p className="text-[9px] text-terracotta/60 mt-2 italic">L'artisan de {product.origin} reste disponible pour vos questions.</p>
                         </div>
                         <img 
                           src={product.image} 
@@ -414,51 +431,19 @@ export default function ArtisanMarketplace() {
             </motion.div>
           </div>
 
-          <a href="#" className="hover:text-terracotta transition-colors">La Galerie</a>
-          <a href="#" className="hover:text-terracotta transition-colors">Nos Artisans</a>
+          <a href="#marketplace" className="hover:text-terracotta transition-colors flex items-center gap-2">
+            <Maximize2 size={14} /> La Galerie
+          </a>
+          <a href="#artisans" className="hover:text-terracotta transition-colors flex items-center gap-2">
+            <Users size={14} /> Nos Artisans
+          </a>
+          <a href="#sur-mesure" className="hover:text-terracotta transition-colors flex items-center gap-2">
+            <Zap size={14} /> Sur Mesure
+          </a>
+          <a href="#avis" className="hover:text-terracotta transition-colors flex items-center gap-2">
+            <MessageCircle size={14} /> Avis
+          </a>
           
-          <Dialog>
-            <DialogTrigger
-              render={
-                <button className="hover:text-terracotta transition-colors uppercase tracking-[0.2em]" />
-              }
-            >
-              Sur Mesure
-            </DialogTrigger>
-            <DialogContent className="glass sm:max-w-lg border-terracotta/20 p-8">
-              <DialogHeader>
-                <DialogTitle className="font-heading text-3xl text-terracotta text-center mb-4">Création Exclusive</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-6">
-                <p className="text-sm font-serif italic text-center text-muted-foreground">
-                  "Donnez vie à vos visions les plus audacieuses en collaborant directement avec nos maîtres artisans."
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-terracotta/5 border border-terracotta/10 text-center">
-                    <span className="block text-lg font-heading text-terracotta mb-1">Matériaux</span>
-                    <span className="text-[10px] uppercase font-bold opacity-60">Sourcing Éthique</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-terracotta/5 border border-terracotta/10 text-center">
-                    <span className="block text-lg font-heading text-terracotta mb-1">Design</span>
-                    <span className="text-[10px] uppercase font-bold opacity-60">Co-création</span>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-black opacity-50">Votre Projet</label>
-                    <textarea 
-                      placeholder="Décrivez l'objet de vos rêves..."
-                      className="w-full bg-white/50 border border-terracotta/20 rounded-xl p-4 text-xs font-sans focus:outline-none focus:ring-1 focus:ring-terracotta h-24"
-                    />
-                  </div>
-                  <Button className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-12 text-xs uppercase tracking-widest font-bold">
-                    Contacter un Maître Artisan
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-
           <Dialog open={isBagOpen} onOpenChange={setIsBagOpen}>
             <DialogTrigger
               render={
@@ -532,37 +517,54 @@ export default function ArtisanMarketplace() {
 
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            className="fixed inset-0 z-[200] bg-sand flex flex-col p-8 md:p-12 overflow-y-auto bg-white"
-          >
-            <div className="flex justify-between items-center mb-16 md:mb-24">
-              <div className="text-2xl font-heading tracking-tight text-terracotta">
-                <span className="font-black">BÉNIN</span>
-                <span className="font-light text-foreground">ARTISAN</span>
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 z-[200] w-[80%] max-w-sm bg-sand flex flex-col p-8 md:p-12 overflow-y-auto bg-white shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-16">
+                <div className="text-xl font-heading tracking-tight text-terracotta">
+                  <span className="font-black">BÉNIN</span>
+                  <span className="font-light text-foreground">ARTISAN</span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
+                  <X size={24} />
+                </Button>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
-                <X size={32} />
-              </Button>
-            </div>
-            <div className="flex flex-col gap-6 md:gap-8">
-              {['La Galerie', 'Nos Artisans', 'Sur Mesure', 'Logistique', 'Contact'].map((item, i) => (
-                <motion.a
-                  key={item}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  href="#"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-4xl md:text-6xl font-heading hover:text-terracotta transition-colors"
-                >
-                  {item}
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
+              <div className="flex flex-col gap-6">
+                {[
+                  { name: 'La Galerie', href: '#marketplace', icon: <Maximize2 size={24} /> },
+                  { name: 'Nos Artisans', href: '#artisans', icon: <Users size={24} /> },
+                  { name: 'Sur Mesure', href: '#sur-mesure', icon: <Zap size={24} /> },
+                  { name: 'Avis Clients', href: '#avis', icon: <MessageCircle size={24} /> },
+                  { name: 'Logistique', href: '#logistique', icon: <Truck size={24} /> }
+                ].map((item, i) => (
+                  <motion.a
+                    key={item.name}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4"
+                  >
+                    {item.icon}
+                    {item.name}
+                  </motion.a>
+                ))}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -582,15 +584,6 @@ export default function ArtisanMarketplace() {
         </motion.div>
 
         <div className="relative z-10 text-center max-w-4xl px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 flex justify-center"
-          >
-            <Badge className="bg-terracotta/10 text-terracotta border-terracotta/20 px-6 py-2 text-xs tracking-[0.3em] font-bold">
-              GALERIE D'ART DIGITALE
-            </Badge>
-          </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -635,7 +628,8 @@ export default function ArtisanMarketplace() {
       </section>
 
       {/* Overview & Logistics Section */}
-      <section className="py-20 md:py-32 px-6 md:px-8 bg-sand">
+      <section id="artisans" className="py-20 md:py-32 px-6 md:px-8 bg-sand relative">
+        <div id="logistique" className="absolute top-0 left-0" />
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24 items-center">
           <div>
             <h2 className="text-4xl md:text-5xl font-heading mb-6 md:mb-8 leading-tight">
@@ -686,7 +680,7 @@ export default function ArtisanMarketplace() {
       </section>
 
       {/* Featured Marketplace Section */}
-      <section className="py-20 md:py-32 px-6 md:px-8">
+      <section id="marketplace" className="py-20 md:py-32 px-6 md:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col xl:flex-row xl:items-end justify-between mb-16 md:mb-24 gap-8">
             <div className="max-w-2xl px-2">
@@ -760,6 +754,101 @@ export default function ArtisanMarketplace() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sur Mesure & Dedicated Section */}
+      <section id="sur-mesure" className="py-24 md:py-40 px-6 md:px-8 bg-sand relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-terracotta/20 to-transparent" />
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
+          <div className="flex-1 space-y-8">
+            <Badge className="bg-terracotta text-white px-4 py-1 uppercase tracking-widest font-bold">Service Conciergerie</Badge>
+            <h2 className="text-4xl md:text-6xl font-heading leading-tight">
+              Votre Vision, <br /> Notre <span className="text-terracotta italic text-5xl md:text-7xl">Excellence</span>
+            </h2>
+            <p className="text-lg text-muted-foreground font-serif leading-relaxed italic max-w-xl">
+              "Le luxe réside dans l'unique. Commandez une pièce conçue exclusivement pour vous, façonnée par les mains des plus grands maîtres du Bénin."
+            </p>
+            <div className="space-y-4">
+               {[
+                 { title: "Co-Design", desc: "Échanges directs avec l'artisan pour affiner chaque détail." },
+                 { title: "Matériaux Nobles", desc: "Accès à des essences de bois et des pigments rares." },
+                 { title: "Suivi Privé", desc: "Recevez des photos et vidéos de la création de votre objet." }
+               ].map((item, i) => (
+                 <div key={i} className="flex gap-4">
+                   <div className="h-6 w-6 rounded-full bg-terracotta/10 flex items-center justify-center shrink-0">
+                     <PenTool size={12} className="text-terracotta" />
+                   </div>
+                   <div>
+                     <h4 className="text-sm font-bold uppercase tracking-tight">{item.title}</h4>
+                     <p className="text-xs text-muted-foreground">{item.desc}</p>
+                   </div>
+                 </div>
+               ))}
+            </div>
+          </div>
+          <div className="flex-1 w-full bg-white p-8 md:p-12 rounded-3xl shadow-2xl border border-terracotta/5 relative">
+            <div className="absolute -top-6 -right-6 h-24 w-24 bg-terracotta rounded-full flex items-center justify-center text-white rotate-12 shadow-xl z-10">
+               <span className="text-[10px] font-black uppercase tracking-widest text-center leading-tight">Unique<br/>Bespoke</span>
+            </div>
+            <form className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black opacity-40">Nom</label>
+                  <input type="text" className="w-full bg-sand border-none rounded-xl p-4 text-xs font-sans outline-none focus:ring-1 focus:ring-terracotta" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black opacity-40">Email</label>
+                  <input type="email" className="w-full bg-sand border-none rounded-xl p-4 text-xs font-sans outline-none focus:ring-1 focus:ring-terracotta" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase font-black opacity-40">Description du Rêve</label>
+                <textarea 
+                  className="w-full bg-sand border-none rounded-xl p-4 text-xs font-sans outline-none focus:ring-1 focus:ring-terracotta h-32" 
+                  placeholder="Décrivez l'objet, les dimensions, les matériaux souhaités..."
+                />
+              </div>
+              <Button type="button" className="w-full bg-terracotta hover:bg-terracotta/90 text-white h-14 rounded-xl text-xs uppercase tracking-[0.2em] font-bold shadow-lg shadow-terracotta/20">
+                Lancer la Co-Création
+              </Button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Avis Clients Section */}
+      <section id="avis" className="py-24 md:py-32 px-6 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-16 md:mb-24">
+            <h2 className="text-3xl md:text-5xl font-heading mb-6 tracking-tight">Le Cercle des <span className="text-terracotta">Collectionneurs</span></h2>
+            <p className="text-sm text-muted-foreground font-serif italic">"Leurs témoignages sont le reflet de notre engagement pour l'excellence."</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            {[
+              { name: "Sébastien L.", city: "Genève", text: "Le Pagne Kanvô reçu est d'une finesse incroyable. On sent le poids de l'histoire et le talent de l'artisan dans chaque fibre.", rating: 5 },
+              { name: "Elena R.", city: "Milan", text: "La pièce sur mesure dépasse mes attentes. Le suivi vidéo pendant la sculpture a rendu l'expérience magique.", rating: 5 },
+              { name: "Jean-Pierre T.", city: "Ouidah", text: "Un service impeccable. La livraison groupée a été rapide et sécurisée. Une fierté pour le Bénin.", rating: 5 }
+            ].map((avis, i) => (
+              <motion.div 
+                key={i} 
+                whileHover={{ y: -5 }}
+                className="p-8 md:p-10 glass rounded-3xl border border-terracotta/10 relative"
+              >
+                <div className="flex gap-1 text-terracotta mb-6">
+                  {Array.from({length: avis.rating}).map((_, j) => <Star key={j} size={14} fill="currentColor" />)}
+                </div>
+                <p className="text-sm md:text-base font-serif italic leading-relaxed mb-8 opacity-80">"{avis.text}"</p>
+                <div className="flex gap-4 items-center">
+                  <div className="h-10 w-10 bg-terracotta/10 rounded-full flex items-center justify-center font-heading text-terracotta font-bold">{avis.name[0]}</div>
+                  <div>
+                    <h5 className="font-bold text-xs uppercase tracking-tight">{avis.name}</h5>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{avis.city}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
