@@ -52,13 +52,13 @@
 }
 
 :root {
-    --background: #F5E6D3; /* Sand background */
+    --background: #F5E6D3;
     --foreground: #1a1a1a;
     --card: rgba(255, 255, 255, 0.4);
     --card-foreground: #1a1a1a;
     --popover: #F5E6D3;
     --popover-foreground: #1a1a1a;
-    --primary: #D97706; /* Terracotta primary */
+    --primary: #D97706;
     --primary-foreground: #ffffff;
     --secondary: #E5D5C3;
     --secondary-foreground: #1a1a1a;
