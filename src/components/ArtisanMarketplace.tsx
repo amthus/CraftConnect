@@ -37,17 +37,73 @@ import {
 } from "@/components/ui/dialog";
 
 // Types
+interface Artisan {
+  id: string;
+  name: string;
+  bio: string;
+  journey: string;
+  location: string;
+  techniques: string[];
+  image: string;
+  works: string[];
+}
+
 interface Product {
   id: string;
   name: string;
   price: number;
   origin: string;
-  artisan: string;
+  artisanId: string;
   image: string;
   category: string;
   soulOfObject: string;
   textureLabel: string;
 }
+
+const ARTISANS: Artisan[] = [
+  {
+    id: 'art-1',
+    name: 'Maman Sènan',
+    bio: "Héritière d'une lignée de potières de Sè, Maman Sènan façonne l'argile depuis son enfance. Sa maîtrise du feu et de la terre est reconnue dans tout le Mono.",
+    journey: "Elle a commencé à aider sa grand-mère à l'âge de 6 ans. Aujourd'hui, elle dirige une coopérative qui préserve les techniques traditionnelles tout en innovant dans les formes.",
+    location: "Sè, Département du Mono, Sud-Bénin",
+    techniques: ["Modelage à la main", "Cuisson à ciel ouvert", "Patinage aux décoctions végétales"],
+    image: "https://i.pravatar.cc/150?u=senan",
+    works: [
+      "https://picsum.photos/seed/p1/400/400",
+      "https://picsum.photos/seed/p2/400/400",
+      "https://picsum.photos/seed/p3/400/400"
+    ]
+  },
+  {
+    id: 'art-2',
+    name: 'Atelier Royal d\'Abomey',
+    bio: "Ce collectif d'artisans perpétue le tissage du Kanvô, le tissu des rois. Chaque motif raconte une épopée, chaque fil est un lien avec le passé glorieux du Danhomè.",
+    journey: "Établi près du palais royal, l'atelier a survécu aux siècles en adaptant ses textiles sans jamais trahir les symboles royaux originels.",
+    location: "Cité Historique d'Abomey",
+    techniques: ["Tissage sur métier horizontal", "Teinture à l'indigo naturel", "Broderie symbolique"],
+    image: "https://i.pravatar.cc/150?u=abomey",
+    works: [
+      "https://picsum.photos/seed/k1/400/400",
+      "https://picsum.photos/seed/k2/400/400",
+      "https://picsum.photos/seed/k3/400/400"
+    ]
+  },
+  {
+    id: 'art-3',
+    name: 'Koffi l\'Ancien',
+    bio: "Maître bronzier spécialisé dans la technique de la cire perdue. Ses œuvres capturent l'essence spirituelle de Ouidah, entre terre et mer.",
+    journey: "Formé par les grands maîtres de la fonderie du quartier des bronziers, Koffi a passé 40 ans à perfectionner l'alliage parfait pour obtenir une patine éternelle.",
+    location: "Quartier des Artisans, Ouidah",
+    techniques: ["Fonderie à la cire perdue", "Ciselage à froid", "Oxydation contrôlée"],
+    image: "https://i.pravatar.cc/150?u=koffi",
+    works: [
+      "https://picsum.photos/seed/b1/400/400",
+      "https://picsum.photos/seed/b2/400/400",
+      "https://picsum.photos/seed/b3/400/400"
+    ]
+  }
+];
 
 const PRODUCTS: Product[] = [
   {
@@ -55,7 +111,7 @@ const PRODUCTS: Product[] = [
     name: 'Poterie de Sè Ancestrale',
     price: 450,
     origin: 'Sè, Mono',
-    artisan: 'Maman Sènan',
+    artisanId: 'art-1',
     image: 'https://picsum.photos/seed/pottery/800/1000',
     category: 'Céramique',
     soulOfObject: "Modelée avec la terre rouge du Mono, cette pièce porte les empreintes de générations de potières.",
@@ -66,7 +122,7 @@ const PRODUCTS: Product[] = [
     name: 'Pagne Tissé Kanvô Royal',
     price: 850,
     origin: 'Abomey',
-    artisan: 'Atelier de la Cour Royale',
+    artisanId: 'art-2',
     image: 'https://picsum.photos/seed/fabric/800/1000',
     category: 'Textile',
     soulOfObject: "Un tissage complexe aux motifs symbolisant la force et la sagesse des rois du Danhomè.",
@@ -77,11 +133,44 @@ const PRODUCTS: Product[] = [
     name: 'Statue Bronze d\'Ouidah',
     price: 1200,
     origin: 'Ouidah',
-    artisan: 'Koffi l\'Ancien',
+    artisanId: 'art-3',
     image: 'https://picsum.photos/seed/bronze/800/1000',
     category: 'Sculpture',
     soulOfObject: "La cire perdue capturant l'esprit des ancêtres sur la côte des esclaves.",
     textureLabel: "Patine de bronze"
+  },
+  {
+    id: '4',
+    name: 'Table Basse Iroko Sculptée',
+    price: 2400,
+    origin: 'Porto-Novo',
+    artisanId: 'art-3',
+    image: 'https://picsum.photos/seed/wood/800/1000',
+    category: 'Mobilier',
+    soulOfObject: "Taillée dans une pièce unique d'Iroko centenaire, représentant les liens familiaux.",
+    textureLabel: "Bois massif nervuré"
+  },
+  {
+    id: '5',
+    name: 'Collier Perles de Bohicon',
+    price: 320,
+    origin: 'Bohicon',
+    artisanId: 'art-1',
+    image: 'https://picsum.photos/seed/jewelry/800/1000',
+    category: 'Joaillerie',
+    soulOfObject: "Enfilage de perles de verre anciennes et pierres semi-précieuses du Nord Bénin.",
+    textureLabel: "Éclats de verre poli"
+  },
+  {
+    id: '6',
+    name: 'Masque Gèlèdé Sacré',
+    price: 1800,
+    origin: 'Kétou',
+    artisanId: 'art-3',
+    image: 'https://picsum.photos/seed/mask/800/1000',
+    category: 'Sculpture',
+    soulOfObject: "Masque cérémoniel honorant les mères ancestrales, sculpté dans le bois de fromager.",
+    textureLabel: "Peinture naturelle mate"
   }
 ];
 
@@ -177,6 +266,9 @@ const TextureVisualizer = ({ image, label }: { image: string, label: string }) =
 
 const ProductCard = ({ product, onAddToBag }: { product: Product, onAddToBag: (p: Product) => void }) => {
   const [videoError, setVideoError] = useState<{message: string, type: 'network' | 'playback' | null} | null>(null);
+  const [isZooming, setIsZooming] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const artisan = ARTISANS.find(a => a.id === product.artisanId) || ARTISANS[0];
 
   const handleVideoError = (e: any) => {
     const code = e.target.error?.code;
@@ -187,150 +279,214 @@ const ProductCard = ({ product, onAddToBag }: { product: Product, onAddToBag: (p
     }
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setMousePos({ x, y });
+  };
+
   return (
     <motion.div 
-      whileHover={{ y: -10 }}
-      className="group relative flex flex-col"
+      whileHover={{ y: -8 }}
+      className="group relative flex flex-col p-4 bg-white/40 glass rounded-3xl transition-all duration-300 hover:shadow-2xl hover:shadow-terracotta/5 border border-transparent hover:border-terracotta/10"
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl mb-6 shadow-xl border border-terracotta/5">
-        <img 
+      <div 
+        className="relative aspect-[3/4] overflow-hidden rounded-2xl mb-6 shadow-xl border border-terracotta/5 cursor-zoom-in"
+        onMouseEnter={() => setIsZooming(true)}
+        onMouseLeave={() => setIsZooming(false)}
+        onMouseMove={handleMouseMove}
+      >
+        <motion.img 
           src={product.image} 
           alt={product.name} 
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          animate={{
+            scale: isZooming ? 1.5 : 1,
+            x: isZooming ? `${(50 - mousePos.x) * 0.5}%` : 0,
+            y: isZooming ? `${(50 - mousePos.y) * 0.5}%` : 0,
+          }}
+          transition={{ type: 'spring', damping: 25, stiffness: 150 }}
+          className="h-full w-full object-cover origin-center"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
-          <Dialog>
-            <DialogTrigger
-              render={
-                <Button variant="outline" className="w-full glass text-white border-white/20 hover:bg-white/20" />
-              }
-            >
-              L'Âme de l'Objet
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[700px] glass border-terracotta/20">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-heading text-terracotta">{product.name}</DialogTitle>
-              </DialogHeader>
-              <div className="grid md:grid-cols-2 gap-8 py-4">
-                <div className="aspect-square relative overflow-hidden rounded-xl bg-muted">
-                  {/* Video Player */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                    {!videoError ? (
-                      <video 
-                        autoPlay 
-                        muted 
-                        loop 
-                        playsInline 
-                        className="w-full h-full object-cover"
-                        src="https://assets.mixkit.co/videos/preview/mixkit-working-with-clay-on-a-pottery-wheel-20023-large.mp4"
-                        onError={handleVideoError}
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
-                        <AlertCircle className="text-terracotta/40 w-12 h-12" />
-                        <div>
-                          <p className="text-sm font-bold uppercase tracking-widest text-terracotta">
-                            {videoError.type === 'network' ? 'Connexion Interrompue' : 'Erreur de Lecture'}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground mt-1">{videoError.message}</p>
-                          <p className="text-[9px] text-terracotta/60 mt-2 italic">L'artisan de {product.origin} reste disponible pour vos questions.</p>
-                        </div>
-                        <img 
-                          src={product.image} 
-                          alt="Fallback" 
-                          className="w-full h-full absolute inset-0 object-cover opacity-20 -z-10" 
-                          referrerPolicy="no-referrer"
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6 pointer-events-none">
+          <div className="pointer-events-auto w-full">
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button variant="outline" className="w-full glass text-white border-white/20 hover:bg-white/20" />
+                }
+              >
+                L'Âme de l'Objet
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[700px] glass border-terracotta/20">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-heading text-terracotta">{product.name}</DialogTitle>
+                </DialogHeader>
+                <div className="grid md:grid-cols-2 gap-8 py-4">
+                  <div className="aspect-square relative overflow-hidden rounded-xl bg-muted">
+                    {/* Video Player */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                      {!videoError ? (
+                        <video 
+                          autoPlay 
+                          muted 
+                          loop 
+                          playsInline 
+                          className="w-full h-full object-cover"
+                          src="https://assets.mixkit.co/videos/preview/mixkit-working-with-clay-on-a-pottery-wheel-20023-large.mp4"
+                          onError={handleVideoError}
                         />
-                      </div>
-                    )}
-                  </div>
-                  <div className="absolute bottom-4 left-4 glass px-3 py-1 rounded-full text-[10px] tracking-widest text-white uppercase font-bold">
-                    Atelier en direct
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-xs uppercase tracking-tighter text-muted-foreground mb-1 font-bold">L'Âme de l'Objet</h4>
-                      <p className="font-serif leading-relaxed text-lg">{product.soulOfObject}</p>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
+                          <AlertCircle className="text-terracotta/40 w-12 h-12" />
+                          <div>
+                            <p className="text-sm font-bold uppercase tracking-widest text-terracotta">
+                              {videoError.type === 'network' ? 'Connexion Interrompue' : 'Erreur de Lecture'}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground mt-1">{videoError.message}</p>
+                            <p className="text-[9px] text-terracotta/60 mt-2 italic">L'artisan de {product.origin} reste disponible pour vos questions.</p>
+                          </div>
+                          <img 
+                            src={product.image} 
+                            alt="Fallback" 
+                            className="w-full h-full absolute inset-0 object-cover opacity-20 -z-10" 
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      )}
                     </div>
-                    <div className="flex gap-2">
-                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-[#1877F2]">
-                         <Facebook size={14} />
-                       </Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-[#1DA1F2]">
-                         <Twitter size={14} />
-                       </Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-[#E60023]">
-                         <Share2 size={14} />
-                       </Button>
+                    <div className="absolute bottom-4 left-4 glass px-3 py-1 rounded-full text-[10px] tracking-widest text-white uppercase font-bold">
+                      Atelier en direct
                     </div>
                   </div>
-                  <div>
-                    <h4 className="text-xs uppercase tracking-tighter text-muted-foreground mb-1 font-bold">Artisan</h4>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border border-terracotta/20">
-                        <AvatarImage src={`https://i.pravatar.cc/150?u=${product.artisan}`} />
-                        <AvatarFallback>{product.artisan[0]}</AvatarFallback>
-                      </Avatar>
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-bold text-sm tracking-tight">{product.artisan}</p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                          <MapPin size={10} /> {product.origin}
-                        </p>
+                        <h4 className="text-xs uppercase tracking-tighter text-muted-foreground mb-1 font-bold">L'Âme de l'Objet</h4>
+                        <p className="font-serif leading-relaxed text-lg">{product.soulOfObject}</p>
+                      </div>
+                      <div className="flex gap-2">
+                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-[#1877F2]">
+                           <Facebook size={14} />
+                         </Button>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-[#1DA1F2]">
+                           <Twitter size={14} />
+                         </Button>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-[#E60023]">
+                           <Share2 size={14} />
+                         </Button>
                       </div>
                     </div>
-                  </div>
-                  <TextureVisualizer image={product.image} label={product.textureLabel} />
-                  <div className="flex items-center justify-between pt-4 border-t border-terracotta/10">
-                    <Dialog>
-                      <DialogTrigger
-                        render={
-                          <Button variant="ghost" className="text-[10px] uppercase tracking-widest font-black text-terracotta/60 hover:text-terracotta hover:bg-transparent p-0" />
-                        }
-                      >
-                        <ShieldCheck size={14} className="mr-2" /> Certificat Digital
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[400px] glass">
-                        <DialogHeader>
-                          <DialogTitle className="font-heading text-center text-2xl">Certificat d'Authenticité</DialogTitle>
-                        </DialogHeader>
-                        <div className="flex flex-col items-center py-8 text-center">
-                          <div className="w-48 h-48 bg-white p-4 rounded-xl mb-6 shadow-inner border border-terracotta/10">
-                            {/* QR Code Placeholder */}
-                            <div className="w-full h-full border-2 border-dashed border-terracotta/20 flex items-center justify-center relative">
-                                <Search size={48} className="text-terracotta/20" />
-                                <div className="absolute inset-0 flex flex-wrap opacity-10">
-                                    {Array.from({length: 100}).map((_, i) => <div key={i} className="w-2 h-2 bg-terracotta" />)}
-                                </div>
+                    <div>
+                      <h4 className="text-xs uppercase tracking-tighter text-muted-foreground mb-1 font-bold">Artisan</h4>
+                      <Dialog>
+                        <DialogTrigger render={
+                          <div className="flex items-center gap-3 cursor-pointer group/artisan">
+                            <Avatar className="h-10 w-10 border border-terracotta/20 group-hover/artisan:ring-2 group-hover/artisan:ring-terracotta transition-all">
+                              <AvatarImage src={artisan.image} />
+                              <AvatarFallback>{artisan.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-bold text-sm tracking-tight group-hover/artisan:text-terracotta transition-colors">{artisan.name}</p>
+                              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                <MapPin size={10} /> {product.origin}
+                              </p>
                             </div>
                           </div>
-                          <Badge className="bg-terracotta mb-4">NFT #BN-{Math.floor(Math.random() * 99999)}</Badge>
-                          <h5 className="font-bold text-sm mb-1 uppercase tracking-tighter">{product.name}</h5>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mb-4">Artisan: {product.artisan}</p>
-                          <div className="h-px w-24 bg-terracotta/20 mb-4" />
-                          <p className="text-xs font-serif leading-relaxed italic opacity-80">
-                            "Ce certificat garantit l'origine Made in Benin et l'utilisation de matériaux sourcés localement."
-                          </p>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    
-                    <div className="flex items-center gap-4">
-                      <span className="text-2xl font-heading text-terracotta">{product.price}€</span>
-                      <Button 
-                        onClick={() => onAddToBag(product)}
-                        className="bg-terracotta hover:bg-terracotta/90 text-white rounded-full px-8 h-10 text-[10px] uppercase font-bold"
-                      >
-                        Acquérir
-                      </Button>
+                        } />
+                        <DialogContent className="sm:max-w-[800px] glass border-terracotta/20 p-0 overflow-hidden">
+                           <div className="flex flex-col md:flex-row h-full">
+                             <div className="md:w-1/2 aspect-[4/5] md:aspect-auto">
+                               <img src={artisan.image.replace('150', '800')} alt={artisan.name} className="w-full h-full object-cover" />
+                             </div>
+                             <div className="md:w-1/2 p-8 space-y-6 overflow-y-auto max-h-[80vh]">
+                               <div>
+                                 <Badge className="bg-terracotta/10 text-terracotta mb-4">Maître Artisan</Badge>
+                                 <h3 className="text-4xl font-heading mb-2">{artisan.name}</h3>
+                                 <p className="text-xs uppercase tracking-widest text-muted-foreground">{artisan.location}</p>
+                               </div>
+                               <div className="space-y-4">
+                                 <div>
+                                   <h4 className="text-[10px] uppercase font-black opacity-40 mb-2">Biographie</h4>
+                                   <p className="text-sm font-serif italic leading-relaxed">{artisan.bio}</p>
+                                 </div>
+                                 <div>
+                                   <h4 className="text-[10px] uppercase font-black opacity-40 mb-2">Parcours Artistique</h4>
+                                   <p className="text-sm font-serif leading-relaxed">{artisan.journey}</p>
+                                 </div>
+                                 <div>
+                                   <h4 className="text-[10px] uppercase font-black opacity-40 mb-2">Techniques Maîtresses</h4>
+                                   <div className="flex flex-wrap gap-2">
+                                     {artisan.techniques.map(t => (
+                                       <Badge key={t} variant="outline" className="border-terracotta/20 text-terracotta text-[9px]">{t}</Badge>
+                                     ))}
+                                   </div>
+                                 </div>
+                               </div>
+                               <div>
+                                  <h4 className="text-[10px] uppercase font-black opacity-40 mb-4">Galerie de l'Atelier</h4>
+                                  <div className="grid grid-cols-3 gap-2">
+                                    {artisan.works.map((w, index) => (
+                                      <img key={index} src={w} alt={`Work ${index}`} className="aspect-square rounded-lg object-cover hover:scale-105 transition-transform" />
+                                    ))}
+                                  </div>
+                               </div>
+                             </div>
+                           </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    <TextureVisualizer image={product.image} label={product.textureLabel} />
+                    <div className="flex items-center justify-between pt-4 border-t border-terracotta/10">
+                      <Dialog>
+                        <DialogTrigger
+                          render={
+                            <Button variant="ghost" className="text-[10px] uppercase tracking-widest font-black text-terracotta/60 hover:text-terracotta hover:bg-transparent p-0" />
+                          }
+                        >
+                          <ShieldCheck size={14} className="mr-2" /> Certificat Digital
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[400px] glass">
+                          <DialogHeader>
+                            <DialogTitle className="font-heading text-center text-2xl">Certificat d'Authenticité</DialogTitle>
+                          </DialogHeader>
+                          <div className="flex flex-col items-center py-8 text-center">
+                            <div className="w-48 h-48 bg-white p-4 rounded-xl mb-6 shadow-inner border border-terracotta/10">
+                              {/* QR Code Placeholder */}
+                              <div className="w-full h-full border-2 border-dashed border-terracotta/20 flex items-center justify-center relative">
+                                  <Search size={48} className="text-terracotta/20" />
+                                  <div className="absolute inset-0 flex flex-wrap opacity-10">
+                                      {Array.from({length: 100}).map((_, i) => <div key={i} className="w-2 h-2 bg-terracotta" />)}
+                                  </div>
+                              </div>
+                            </div>
+                            <Badge className="bg-terracotta mb-4">NFT #BN-{Math.floor(Math.random() * 99999)}</Badge>
+                            <h5 className="font-bold text-sm mb-1 uppercase tracking-tighter">{product.name}</h5>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mb-4">Artisan: {artisan.name}</p>
+                            <div className="h-px w-24 bg-terracotta/20 mb-4" />
+                            <p className="text-xs font-serif leading-relaxed italic opacity-80">
+                              "Ce certificat garantit l'origine Made in Benin et l'utilisation de matériaux sourcés localement."
+                            </p>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      
+                      <div className="flex items-center gap-4">
+                        <span className="text-2xl font-heading text-terracotta">{product.price}€</span>
+                        <Button 
+                          onClick={() => onAddToBag(product)}
+                          className="bg-terracotta hover:bg-terracotta/90 text-white rounded-full px-8 h-10 text-[10px] uppercase font-bold"
+                        >
+                          Acquérir
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
       <div>
@@ -365,7 +521,22 @@ export default function ArtisanMarketplace() {
   const [selectedCategory, setSelectedCategory] = useState('Tous');
   const [bagItems, setBagItems] = useState<Product[]>([]);
   const [isBagOpen, setIsBagOpen] = useState(false);
+  const [shippingCountry, setShippingCountry] = useState('France');
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const totalBagPrice = bagItems.reduce((acc, item) => acc + item.price, 0);
+
+  const countries = [
+    { name: 'France', shipping: 25, duties: 0.2 },
+    { name: 'Suisse', shipping: 35, duties: 0.15 },
+    { name: 'USA', shipping: 60, duties: 0.25 },
+    { name: 'Bénin', shipping: 10, duties: 0 },
+  ];
+
+  const currentCountry = countries.find(c => c.name === shippingCountry) || countries[0];
+  const shippingCost = currentCountry.shipping;
+  const customsDuties = totalBagPrice * currentCountry.duties;
+  const finalTotal = totalBagPrice + shippingCost + customsDuties;
 
   const { scrollY } = useScroll();
   
@@ -382,13 +553,14 @@ export default function ArtisanMarketplace() {
   }, []);
 
   const filteredProducts = PRODUCTS.filter(p => {
+    const artisanName = (ARTISANS.find(a => a.id === p.artisanId))?.name || "";
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.artisan.toLowerCase().includes(searchQuery.toLowerCase());
+                          artisanName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'Tous' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ['Tous', 'Céramique', 'Textile', 'Sculpture'];
+  const categories = ['Tous', 'Céramique', 'Textile', 'Sculpture', 'Mobilier', 'Joaillerie'];
 
   const addToBag = (product: Product) => {
     setBagItems([...bagItems, product]);
@@ -397,8 +569,6 @@ export default function ArtisanMarketplace() {
   const removeFromBag = (id: string) => {
     setBagItems(bagItems.filter(item => item.id !== id));
   };
-
-  const totalBagPrice = bagItems.reduce((acc, item) => acc + item.price, 0);
 
   return (
     <div className="min-h-screen relative font-sans selection:bg-terracotta selection:text-white pb-20">
@@ -468,7 +638,7 @@ export default function ArtisanMarketplace() {
               <DialogHeader>
                 <DialogTitle className="text-3xl font-heading text-terracotta">Mon Panier</DialogTitle>
               </DialogHeader>
-              <div className="space-y-6 pt-4 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-6 pt-4 max-h-[40vh] overflow-y-auto pr-2">
                 {bagItems.length === 0 ? (
                   <div className="text-center py-12">
                     <ShoppingBag className="mx-auto text-terracotta/20 mb-4" size={48} />
@@ -482,7 +652,7 @@ export default function ArtisanMarketplace() {
                       </div>
                       <div className="flex-1">
                         <p className="font-bold text-sm tracking-tight">{item.name}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase">{item.artisan}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase">{(ARTISANS.find(a => a.id === item.artisanId))?.name}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-heading text-terracotta text-sm">{item.price}€</p>
@@ -494,12 +664,38 @@ export default function ArtisanMarketplace() {
               </div>
               {bagItems.length > 0 && (
                 <div className="pt-6 border-t border-terracotta/10 space-y-4">
-                  <div className="flex justify-between items-end">
-                    <span className="text-xs uppercase font-black opacity-50">Total</span>
-                    <span className="text-3xl font-heading text-terracotta">{totalBagPrice}€</span>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-black opacity-50">Pays de Livraison</label>
+                    <select 
+                      value={shippingCountry}
+                      onChange={(e) => setShippingCountry(e.target.value)}
+                      className="w-full bg-white/50 border border-terracotta/20 rounded-xl px-4 h-10 text-xs focus:ring-1 focus:ring-terracotta outline-none"
+                    >
+                      {countries.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                    </select>
                   </div>
-                  <Button className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-12 text-xs uppercase tracking-widest font-bold">
-                    Passer à l'achat sécurisé
+                  
+                  <div className="space-y-2 text-[10px] uppercase tracking-widest font-bold opacity-60">
+                    <div className="flex justify-between">
+                      <span>Sous-total pièces</span>
+                      <span>{totalBagPrice}€</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Frais d'expédition</span>
+                      <span>{shippingCost}€</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Estimations Douanes</span>
+                      <span>{customsDuties.toFixed(2)}€</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-end pt-2 border-t border-terracotta/5">
+                    <span className="text-xs uppercase font-black opacity-80">Total Final</span>
+                    <span className="text-3xl font-heading text-terracotta">{finalTotal.toFixed(2)}€</span>
+                  </div>
+                  <Button className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-12 text-xs uppercase tracking-widest font-bold shadow-lg shadow-terracotta/20">
+                    Accéder au Paiement Sécurisé
                   </Button>
                 </div>
               )}
@@ -606,14 +802,16 @@ export default function ArtisanMarketplace() {
             transition={{ delay: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6"
           >
-            <Button size="lg" className="w-full sm:w-auto bg-terracotta hover:bg-terracotta/90 text-white rounded-full px-12 h-14 text-sm tracking-widest uppercase font-bold group">
-              Explorer la Collection
-              <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] uppercase tracking-widest font-black opacity-40">Découvrir l'histoire</span>
-              <div className="h-px w-8 md:w-12 bg-terracotta/30" />
-            </div>
+            <a href="#marketplace" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto bg-terracotta hover:bg-terracotta/90 text-white rounded-full px-12 h-14 text-sm tracking-widest uppercase font-bold group">
+                Explorer la Collection
+                <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </a>
+            <a href="#artisans" className="flex items-center gap-3 group translate-y-1">
+              <span className="text-[10px] uppercase tracking-widest font-black opacity-40 group-hover:opacity-100 group-hover:text-terracotta transition-all">Découvrir l'histoire</span>
+              <div className="h-px w-8 md:w-12 bg-terracotta/30 group-hover:bg-terracotta transition-all" />
+            </a>
           </motion.div>
         </div>
 
