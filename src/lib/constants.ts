@@ -26,6 +26,7 @@ import {
 export interface Artisan {
   id: string;
   name: string;
+  specialty?: string;
   bio: string;
   journey: string;
   location: string;
@@ -51,6 +52,7 @@ export const ARTISANS: Artisan[] = [
   {
     id: 'art-1',
     name: 'Maman Sènan',
+    specialty: 'Céramique Ancestrale',
     bio: "Héritière d'une lignée de potières de Sè, Maman Sènan façonne l'argile depuis son enfance. Sa maîtrise du feu et de la terre est reconnue dans tout le Mono.",
     journey: "Elle a commencé à aider sa grand-mère à l'âge de 6 ans. Aujourd'hui, elle dirige une coopérative qui préserve les techniques traditionnelles tout en innovant dans les formes.",
     location: "Sè, Département du Mono, Sud-Bénin",
@@ -65,6 +67,7 @@ export const ARTISANS: Artisan[] = [
   {
     id: 'art-2',
     name: 'Atelier Royal dAbomey',
+    specialty: 'Tissage Kanvô',
     bio: "Ce collectif d'artisans perpétue le tissage du Kanvô, le tissu des rois. Chaque motif raconte une épopée, chaque fil est un lien avec le passé glorieux du Danhomè.",
     journey: "Établi près du palais royal, l'atelier a survécu aux siècles en adaptant ses textiles sans jamais trahir les symboles royaux originels.",
     location: "Cité Historique dAbomey",
@@ -79,6 +82,7 @@ export const ARTISANS: Artisan[] = [
   {
     id: 'art-3',
     name: 'Koffi lAncien',
+    specialty: 'Bronzier dArt',
     bio: "Maître bronzier spécialisé dans la technique de la cire perdue. Ses œuvres capturent l'essence spirituelle de Ouidah, entre terre et mer.",
     journey: "Formé par les grands maîtres de la fonderie du quartier des bronziers, Koffi a passé 40 ans à perfectionner l'alliage parfait pour obtenir une patine éternelle.",
     location: "Quartier des Artisans, Ouidah",

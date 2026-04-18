@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'client' | 'artisan'>('client');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -23,13 +24,19 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, password }),
+        body: JSON.stringify({ name, email, phone, password, role }),
       });
       const data = await res.json();
       if (res.ok) {
         login(data.token, data.user);
         toast.success(`Bienvenue au Bénin, ${data.user.name}`);
-        navigate('/dashboard');
+        
+        // Conditional navigation based on role
+        if (data.user.role === 'artisan') {
+          navigate('/artisan');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         toast.error(data.error || "Erreur lors de l'inscription");
       }
@@ -54,18 +61,40 @@ export default function RegisterPage() {
               <UserPlus className="text-terracotta" size={32} />
             </div>
             <h1 className="text-3xl font-heading mb-2">L'Initiation</h1>
-            <p className="text-xs text-muted-foreground font-serif italic">Rejoignez l'élite des collectionneurs</p>
+            <p className="text-xs text-muted-foreground font-serif italic">Rejoignez l'élite des collectionneurs ou devenez Maître Artisan</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Role Selection */}
+            <div className="bg-sand/20 p-2 rounded-2xl border border-terracotta/5 grid grid-cols-2 gap-2 mb-6">
+              <button
+                type="button"
+                onClick={() => setRole('client')}
+                className={`py-3 rounded-xl text-[9px] uppercase font-black tracking-widest transition-all ${
+                  role === 'client' ? 'bg-terracotta text-white shadow-lg' : 'text-foreground/40 hover:bg-white/50'
+                }`}
+              >
+                Collectionneur
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('artisan')}
+                className={`py-3 rounded-xl text-[9px] uppercase font-black tracking-widest transition-all ${
+                  role === 'artisan' ? 'bg-terracotta text-white shadow-lg' : 'text-foreground/40 hover:bg-white/50'
+                }`}
+              >
+                Maître Artisan
+              </button>
+            </div>
+
             <div className="space-y-2">
-              <label className="text-[9px] uppercase font-black tracking-widest opacity-40 ml-4">Nom de Collectionneur</label>
+              <label className="text-[9px] uppercase font-black tracking-widest opacity-40 ml-4">Nom complet</label>
               <input 
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full h-12 px-6 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-2 focus:ring-terracotta outline-none transition-all text-sm"
-                placeholder="Ex: Aurelien Z."
+                className="w-full h-12 px-6 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-2 focus:ring-terracotta outline-none transition-all text-sm font-sans"
+                placeholder={role === 'artisan' ? "Ex: Maître Kodjo" : "Ex: Aurelien Z."}
                 required
               />
             </div>

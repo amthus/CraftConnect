@@ -7,6 +7,7 @@ import RegisterPage from './components/RegisterPage';
 import { ForgotPasswordPage, ResetPasswordPage } from './components/AuthRecoveryPages';
 import ClientDashboard from './components/ClientDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import ArtisanDashboard from './components/ArtisanDashboard';
 import HistoryPage from './components/HistoryPage';
 import ProductDetailPage from './components/ProductDetailPage';
 import ArtisansPage from './components/ArtisansPage';
@@ -19,7 +20,7 @@ import { Toaster } from 'sonner';
 
 import ErrorBoundary from './components/ErrorBoundary';
 
-const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: 'client' | 'admin' }) => {
+const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: 'client' | 'admin' | 'artisan' }) => {
   const { user, isLoading } = useAuth();
   if (isLoading) return null;
   if (!user) return <Navigate to="/login" />;
@@ -61,6 +62,14 @@ export default function App() {
                 element={
                   <ProtectedRoute role="admin">
                     <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/artisan" 
+                element={
+                  <ProtectedRoute role="artisan">
+                    <ArtisanDashboard />
                   </ProtectedRoute>
                 } 
               />

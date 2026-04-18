@@ -44,7 +44,7 @@ async function startServer() {
 
   // --- Auth API ---
   app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     if (users.find(u => u.email === email)) {
       return res.status(400).json({ error: 'Email déjà utilisé' });
     }
@@ -53,7 +53,7 @@ async function startServer() {
       name,
       email,
       password: bcrypt.hashSync(password, 10),
-      role: 'client'
+      role: role === 'artisan' ? 'artisan' : 'client'
     };
     users.push(newUser);
     const token = jwt.sign({ id: newUser.id, role: newUser.role }, JWT_SECRET, { expiresIn: '24h' });

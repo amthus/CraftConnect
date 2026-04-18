@@ -27,7 +27,15 @@ export default function LoginPage() {
       if (res.ok) {
         login(data.token, data.user);
         toast.success(`Bienvenue, ${data.user.name}`);
-        navigate(data.user.role === 'admin' ? '/admin' : '/dashboard');
+        
+        // Dynamic redirection based on role
+        if (data.user.role === 'admin') {
+          navigate('/admin');
+        } else if (data.user.role === 'artisan') {
+          navigate('/artisan');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         toast.error(data.error || 'Erreur de connexion');
       }
