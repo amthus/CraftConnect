@@ -141,7 +141,7 @@ export default function ProductDetailPage() {
               <p className="font-bold text-xl">{artisan.name}</p>
               <p className="text-sm text-muted-foreground font-serif italic">{artisan.location}</p>
             </div>
-            <Link to={`/#artisans`}>
+            <Link to={`/artisans`}>
                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-terracotta/5"><ChevronRight size={20}/></Button>
             </Link>
           </div>

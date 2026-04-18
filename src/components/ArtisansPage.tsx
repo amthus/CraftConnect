@@ -145,9 +145,11 @@ export default function ArtisansPage() {
               <h2 className="text-4xl font-heading leading-tight">Vous êtes un <span className="text-terracotta italic font-light">Artisan</span> ?</h2>
               <p className="text-muted-foreground font-serif italic text-lg leading-relaxed">Rejoignez notre galerie et portez votre voix au-delà des frontières. Nous valorisons l'excellence et l'authenticité.</p>
            </div>
-           <Button className="bg-foreground text-sand rounded-full px-12 h-16 uppercase font-black text-[11px] tracking-[0.2em] shadow-2xl hover:bg-terracotta transition-all active:scale-95">
-              Rejoindre la Communauté
-           </Button>
+           <Link to="/register">
+             <Button className="bg-foreground text-sand rounded-full px-12 h-16 uppercase font-black text-[11px] tracking-[0.2em] shadow-2xl hover:bg-terracotta transition-all active:scale-95">
+                Rejoindre la Communauté
+             </Button>
+           </Link>
         </div>
       </section>
 

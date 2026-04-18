@@ -41,13 +41,13 @@ export default function ArtisanMarketplace() {
       <WishlistSidebar />
       <FloatingSupport />
 
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-sand">
+      <section className="relative min-h-screen py-20 flex items-center justify-center overflow-hidden bg-sand">
         <motion.div style={{ opacity: heroOpacity, scale: heroScale, y: heroY }} className="absolute inset-0 z-0">
           <img src="https://picsum.photos/seed/market/1920/1080?blur=1" alt="Back" className="w-full h-full object-cover opacity-40 scale-110" referrerPolicy="no-referrer" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-sand to-sand" />
         </motion.div>
-        <div className="relative z-10 text-center max-w-4xl px-4">
-          <motion.h1 initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-4xl md:text-7xl lg:text-[7rem] font-heading leading-tight md:leading-none tracking-tight mb-8 text-shadow-gold">
+        <div className="relative z-10 text-center max-w-4xl px-6 md:px-4">
+          <motion.h1 initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-4xl sm:text-5xl md:text-7xl lg:text-[7rem] font-heading leading-tight md:leading-none tracking-tight mb-8 text-shadow-gold">
             L'Authenticité <br /> <span className="text-terracotta">Expatriée</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-base md:text-xl text-muted-foreground font-serif leading-relaxed italic max-w-2xl mx-auto mb-10">
@@ -103,19 +103,21 @@ export default function ArtisanMarketplace() {
             </div>
             <div className="grid gap-6">
               {ARTISANS.map(artisan => (
-                <div key={artisan.id} className="flex items-center gap-5 p-5 glass rounded-2xl border border-white/40 hover:border-terracotta/20 transition-all cursor-pointer group">
-                  <Avatar className="h-16 w-16 ring-4 ring-white group-hover:ring-terracotta/20 transition-all">
-                    <AvatarImage src={artisan.image} />
-                    <AvatarFallback>{artisan.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="text-2xl font-heading">{artisan.name}</h4>
-                    <p className="text-xs text-muted-foreground uppercase mb-2">{artisan.location}</p>
-                    <div className="flex gap-2">
-                      {artisan.techniques.slice(0, 2).map(t => <Badge key={t} variant="outline" className="text-[9px] uppercase">{t}</Badge>)}
+                <Link key={artisan.id} to="/artisans">
+                  <div className="flex items-center gap-5 p-5 glass rounded-2xl border border-white/40 hover:border-terracotta/20 transition-all cursor-pointer group">
+                    <Avatar className="h-16 w-16 ring-4 ring-white group-hover:ring-terracotta/20 transition-all">
+                      <AvatarImage src={artisan.image} />
+                      <AvatarFallback>{artisan.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h4 className="text-2xl font-heading">{artisan.name}</h4>
+                      <p className="text-xs text-muted-foreground uppercase mb-2">{artisan.location}</p>
+                      <div className="flex gap-2">
+                        {artisan.techniques.slice(0, 2).map(t => <Badge key={t} variant="outline" className="text-[9px] uppercase">{t}</Badge>)}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -158,9 +160,9 @@ export default function ArtisanMarketplace() {
               </Button>
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-6 scale-110">
-            <img src="https://picsum.photos/seed/custom1/600/800" className="rounded-3xl shadow-2xl skew-y-3" alt="Custom" />
-            <img src="https://picsum.photos/seed/custom2/600/800" className="rounded-3xl shadow-2xl -skew-y-3 mt-12" alt="Custom" />
+          <div className="grid grid-cols-2 gap-4 md:gap-6 md:scale-110">
+            <img src="https://picsum.photos/seed/custom1/600/800" className="rounded-3xl shadow-2xl skew-y-1 md:skew-y-3" alt="Custom" />
+            <img src="https://picsum.photos/seed/custom2/600/800" className="rounded-3xl shadow-2xl -skew-y-1 md:-skew-y-3 mt-8 md:mt-12" alt="Custom" />
           </div>
         </div>
       </section>
@@ -235,7 +237,7 @@ export default function ArtisanMarketplace() {
             </div>
             <p className="text-xs text-muted-foreground max-w-xs font-serif italic">Promouvoir l'excellence artisanale du Bénin sur la scène internationale, une pièce unique à la fois.</p>
           </div>
-          <div className="flex gap-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:flex gap-10">
             {[
               { title: "Galerie", items: [
                 { name: "Nouveautés", link: "/marketplace" },

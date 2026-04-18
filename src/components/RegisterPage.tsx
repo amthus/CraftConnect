@@ -10,6 +10,7 @@ import { UserPlus, ShieldCheck } from 'lucide-react';
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
@@ -22,7 +23,7 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, phone, password }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -76,6 +77,17 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-12 px-6 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-2 focus:ring-terracotta outline-none transition-all text-sm"
                 placeholder="votre@email.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[9px] uppercase font-black tracking-widest opacity-40 ml-4">Téléphone</label>
+              <input 
+                type="tel" 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full h-12 px-6 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-2 focus:ring-terracotta outline-none transition-all text-sm"
+                placeholder="+229 01 00 00 00 00"
                 required
               />
             </div>

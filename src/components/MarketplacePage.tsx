@@ -60,9 +60,9 @@ export default function MarketplacePage() {
           </motion.h1>
           
           <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row gap-6 items-end justify-between">
-              <div className="w-full md:w-1/2 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-terracotta/40" size={18} />
+            <div className="flex flex-col md:flex-row gap-6 items-center md:items-end justify-between">
+              <div className="w-full md:w-1/2 relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-terracotta/40 group-focus-within:text-terracotta transition-colors" size={18} />
                 <input 
                   type="text"
                   placeholder="Chercher une pièce, un artisan, une ville..."
@@ -70,7 +70,7 @@ export default function MarketplacePage() {
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-11 pr-4 bg-sand/50 border-none rounded-xl focus:ring-2 focus:ring-terracotta shadow-inner text-sm"
+                  className="w-full h-12 pl-11 pr-4 bg-sand/50 border-none rounded-xl focus:ring-2 focus:ring-terracotta shadow-inner text-sm transition-all"
                 />
                 <AnimatePresence>
                   {showSuggestions && (

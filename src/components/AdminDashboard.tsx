@@ -66,7 +66,10 @@ export default function AdminDashboard() {
              <Link to="/marketplace">
                 <Button variant="outline" className="rounded-full px-6 border-terracotta/20 font-bold text-[9px] uppercase tracking-widest h-11">Voir Boutique</Button>
              </Link>
-             <Button className="bg-terracotta rounded-full px-8 font-black text-[9px] uppercase tracking-[0.2em] shadow-xl hover:bg-terracotta/90 h-11 flex items-center gap-2">
+             <Button 
+                onClick={() => toast.info("Ouverture du formulaire de création de pièce... (Fonctionnalité administrative)")}
+                className="bg-terracotta rounded-full px-8 font-black text-[9px] uppercase tracking-[0.2em] shadow-xl hover:bg-terracotta/90 h-11 flex items-center gap-2"
+             >
                 <Plus size={16} /> Pièce Unique
              </Button>
              <Button variant="ghost" onClick={handleLogout} className="rounded-full h-11 w-11 hover:bg-red-50 text-red-500">
@@ -106,7 +109,13 @@ export default function AdminDashboard() {
           <section className="lg:col-span-2 space-y-8">
              <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-heading">Flux des Commandes</h3>
-                <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest text-terracotta">Voir Historique</Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => toast.info("Chargement de l'historique complet des transactions...")}
+                  className="text-[10px] font-black uppercase tracking-widest text-terracotta"
+                >
+                  Voir Historique
+                </Button>
              </div>
              <div className="glass rounded-[2rem] border border-terracotta/5 overflow-hidden">
                 <table className="w-full text-left">
@@ -163,7 +172,12 @@ export default function AdminDashboard() {
                      </div>
                   </div>
                 ))}
-                <Button className="w-full h-14 bg-sand text-terracotta hover:bg-terracotta hover:text-white transition-all rounded-2xl text-[10px] uppercase font-black tracking-widest">Voir tous les logs</Button>
+                <Button 
+                  onClick={() => toast.info("Accès aux journaux système de la plateforme...")}
+                  className="w-full h-14 bg-sand text-terracotta hover:bg-terracotta hover:text-white transition-all rounded-2xl text-[10px] uppercase font-black tracking-widest"
+                >
+                  Voir tous les logs
+                </Button>
              </div>
 
              <div className="glass p-8 rounded-[2rem] border border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden">

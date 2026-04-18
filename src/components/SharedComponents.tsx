@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -183,26 +184,26 @@ export const Nav = () => {
                   <X size={24} />
                 </Button>
               </div>
-              <div className="flex flex-col gap-6">
-                <Link to="/marketplace" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
+              <div className="flex flex-col gap-5 md:gap-6">
+                <Link to="/marketplace" onClick={() => setIsMenuOpen(false)} className="text-xl md:text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Maximize2 size={24} /> La Galerie
                 </Link>
-                <Link to="/artisans" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
+                <Link to="/artisans" onClick={() => setIsMenuOpen(false)} className="text-xl md:text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Users size={24} /> Nos Artisans
                 </Link>
-                <Link to="/custom-order" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
+                <Link to="/custom-order" onClick={() => setIsMenuOpen(false)} className="text-xl md:text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Zap size={24} /> Sur Mesure
                 </Link>
-                <Link to="/history" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
+                <Link to="/history" onClick={() => setIsMenuOpen(false)} className="text-xl md:text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Scroll size={24} /> Notre Histoire
                 </Link>
                 {user && (
                   <>
-                    <button onClick={() => { setIsMenuOpen(false); setIsWishlistOpen(true); }} className="text-2xl font-heading flex items-center justify-between hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4 text-left w-full">
+                    <button onClick={() => { setIsMenuOpen(false); setIsWishlistOpen(true); }} className="text-xl md:text-2xl font-heading flex items-center justify-between hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4 text-left w-full">
                       <div className="flex items-center gap-4"><Heart size={24} /> Ma Wishlist</div>
                       {wishlistItems.length > 0 && <Badge className="bg-terracotta text-white">{wishlistItems.length}</Badge>}
                     </button>
-                    <button onClick={() => { setIsMenuOpen(false); setIsBagOpen(true); }} className="text-2xl font-heading flex items-center justify-between hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4 text-left w-full">
+                    <button onClick={() => { setIsMenuOpen(false); setIsBagOpen(true); }} className="text-xl md:text-2xl font-heading flex items-center justify-between hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4 text-left w-full">
                       <div className="flex items-center gap-4"><ShoppingBag size={24} /> Mon Panier</div>
                       {bagItems.length > 0 && <Badge className="bg-terracotta text-white">{bagItems.length}</Badge>}
                     </button>
@@ -451,6 +452,10 @@ export const CartSidebar = () => {
 
                 <div className="space-y-3">
                   <Button 
+                    onClick={() => {
+                        toast.success("Commande transmise ! Vous allez être redirigé vers l'espace de paiement sécurisé.");
+                        // In a real app, this would redirect to Stripe/PayPal
+                    }}
                     className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-14 text-xs uppercase tracking-widest font-bold shadow-xl shadow-terracotta/30"
                   >
                     Confirmer et Payer

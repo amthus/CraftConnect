@@ -4,7 +4,7 @@ import { useAuth } from '../lib/AuthContext';
 import { Nav, FloatingSupport } from './SharedComponents';
 import { Package, Heart, CreditCard, Settings, MapPin, ChevronRight, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { PRODUCTS } from '../lib/constants';
 
 interface Order {
@@ -237,7 +237,9 @@ export default function ClientDashboard() {
              <div className="relative z-10 space-y-5">
                 <h3 className="text-2xl font-heading">Besoin d'Aide ?</h3>
                 <p className="text-sm text-muted-foreground font-serif italic leading-relaxed">Votre concierge personnel est disponible pour toute question sur vos livraisons ou pour une demande de personnalisation.</p>
-                <Button className="bg-terracotta text-white rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95">Contacter la Conciergerie</Button>
+                <Link to="/contact">
+                  <Button className="bg-terracotta text-white rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 w-full md:w-auto">Contacter la Conciergerie</Button>
+                </Link>
              </div>
              <Package size={160} className="absolute -bottom-8 -right-8 text-terracotta/5 -rotate-12" />
           </section>
