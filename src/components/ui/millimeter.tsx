@@ -78,7 +78,7 @@ export const MTableCell = ({ children, className }: { children: React.ReactNode;
 );
 
 // --- Badge ---
-export const MBadge = ({ children, variant = 'default' }: { children: React.ReactNode, variant?: 'default' | 'success' | 'warning' | 'error' }) => {
+export const MBadge = ({ children, variant = 'default', className }: { children: React.ReactNode, variant?: 'default' | 'success' | 'warning' | 'error', className?: string }) => {
   const styles = {
     default: "bg-terracotta/5 text-terracotta border-terracotta/10",
     success: "bg-emerald-50 text-emerald-600 border-emerald-100",
@@ -88,7 +88,8 @@ export const MBadge = ({ children, variant = 'default' }: { children: React.Reac
   return (
     <span className={cn(
       "text-[9px] uppercase font-mono font-bold tracking-widest px-2.5 py-1 rounded-md border",
-      styles[variant]
+      styles[variant],
+      className
     )}>
       {children}
     </span>

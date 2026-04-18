@@ -44,9 +44,45 @@ export default function ArtisanDashboard() {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
 
+  const handleCreateProduct = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newProduct = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: formData.get('name') as string,
+      category: formData.get('category') as string,
+      price: Number(formData.get('price')),
+      origin: "Bénin",
+      image: "https://picsum.photos/seed/new/400/400",
+      artisanId: '1',
+      soulOfObject: formData.get('description') as string,
+      textureLabel: "Original",
+      stock: 1
+    };
+    setLocalProducts([newProduct, ...localProducts]);
+    toast.success("Pièce publiée avec succès !");
+    setIsAddProductOpen(false);
+  };
+
+  const handleUpdateProduct = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setLocalProducts(prev => prev.map(p => p.id === editingProduct.id ? {
+      ...p,
+      name: formData.get('name') as string,
+      category: formData.get('category') as string,
+      price: Number(formData.get('price')),
+      soulOfObject: formData.get('description') as string,
+    } : p));
+    toast.success("Mise à jour de l'oeuvre réussie !");
+    setEditingProduct(null);
+  };
+
   const handleDeleteProduct = (id: string) => {
-    setLocalProducts(prev => prev.filter(p => p.id !== id));
-    toast.success("Pièce retirée de la galerie");
+    if(confirm("Retirer cette oeuvre de la vente ?")) {
+      setLocalProducts(prev => prev.filter(p => p.id !== id));
+      toast.success("Pièce retirée de la galerie");
+    }
   };
 
   const mockRequests = [
@@ -202,15 +238,15 @@ export default function ArtisanDashboard() {
               className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-10 overflow-y-auto max-h-[90vh]"
             >
               <h2 className="text-3xl font-heading mb-8">Nouvelle <span className="text-terracotta">Création</span></h2>
-              <form className="grid gap-6" onSubmit={(e) => { e.preventDefault(); toast.success("Produit ajouté !"); setIsAddProductOpen(false); }}>
+              <form className="grid gap-6" onSubmit={handleCreateProduct}>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom de la pièce</label>
-                    <input type="text" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none focus:ring-1 focus:ring-terracotta" required />
+                    <input name="name" type="text" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none focus:ring-1 focus:ring-terracotta" required />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Catégorie</label>
-                    <select className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required>
+                    <select name="category" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required>
                       <option value="">Sélectionner</option>
                       <option>Sculpture</option>
                       <option>Textile</option>
@@ -220,11 +256,11 @@ export default function ArtisanDashboard() {
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Prix de vente (€)</label>
-                   <input type="number" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                   <input name="price" type="number" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Description de l'Artiste</label>
-                  <textarea rows={3} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
+                  <textarea name="description" rows={3} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
                 </div>
                 <div className="pt-4 flex gap-4">
                   <Button variant="ghost" onClick={() => setIsAddProductOpen(false)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
@@ -243,15 +279,15 @@ export default function ArtisanDashboard() {
               className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-10 overflow-y-auto max-h-[90vh]"
             >
               <h2 className="text-3xl font-heading mb-8">Éditer <span className="text-terracotta">L'Oeuvre</span></h2>
-              <form className="grid gap-6" onSubmit={(e) => { e.preventDefault(); toast.success("Mise à jour réussie !"); setEditingProduct(null); }}>
+              <form className="grid gap-6" onSubmit={handleUpdateProduct}>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom de la pièce</label>
-                    <input type="text" defaultValue={editingProduct.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none focus:ring-1 focus:ring-terracotta" required />
+                    <input name="name" type="text" defaultValue={editingProduct.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none focus:ring-1 focus:ring-terracotta" required />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Catégorie</label>
-                    <select className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" defaultValue={editingProduct.category} required>
+                    <select name="category" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" defaultValue={editingProduct.category} required>
                       <option>Sculpture</option>
                       <option>Textile</option>
                       <option>Céramique</option>
@@ -260,11 +296,11 @@ export default function ArtisanDashboard() {
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Prix de vente (€)</label>
-                   <input type="number" defaultValue={editingProduct.price} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                   <input name="price" type="number" defaultValue={editingProduct.price} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Description de l'Artiste</label>
-                  <textarea rows={3} defaultValue={editingProduct.description} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
+                  <textarea name="description" rows={3} defaultValue={editingProduct.soulOfObject || editingProduct.description} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
                 </div>
                 <div className="pt-4 flex gap-4">
                   <Button variant="ghost" onClick={() => setEditingProduct(null)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>

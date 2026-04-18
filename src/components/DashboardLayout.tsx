@@ -38,6 +38,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -200,14 +201,75 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                    <span className="text-[9px] font-mono font-bold tracking-[0.2em] text-terracotta/60 uppercase">{user?.role}</span>
                 </div>
               </div>
+              
               <div className="relative group">
-                <div className="absolute -inset-1 bg-terracotta/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
-                <Avatar className="h-11 w-11 border-2 border-white ring-1 ring-terracotta/10 rounded-xl relative">
-                  {user?.avatar && <AvatarImage src={user.avatar} className="object-cover" />}
-                  <AvatarFallback className="bg-sand text-terracotta font-black text-xs">
-                    {user ? getInitials(user.name) : 'U'}
-                  </AvatarFallback>
-                </Avatar>
+                <button 
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  className="relative flex items-center gap-2 group-hover:opacity-80 transition-opacity"
+                >
+                  <div className="absolute -inset-1 bg-terracotta/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                  <Avatar className="h-11 w-11 border-2 border-white ring-1 ring-terracotta/10 rounded-xl relative">
+                    {user?.avatar && <AvatarImage src={user.avatar} className="object-cover" />}
+                    <AvatarFallback className="bg-sand text-terracotta font-black text-xs">
+                      {user ? getInitials(user.name) : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+
+                <AnimatePresence>
+                  {isProfileMenuOpen && (
+                    <>
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-40"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      />
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 mt-4 w-64 bg-white rounded-2xl shadow-2xl border border-terracotta/10 z-50 p-2 overflow-hidden shadow-terracotta/10"
+                      >
+                        <div className="p-4 border-b border-terracotta/5 mb-2">
+                          <p className="text-[11px] font-black uppercase tracking-widest text-foreground">{user?.name}</p>
+                          <p className="text-[9px] font-mono font-bold text-terracotta/60 uppercase mt-1">Niveau • {user?.role}</p>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <Link 
+                            to="/settings" 
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 h-12 rounded-xl text-foreground/70 hover:bg-terracotta/[0.03] hover:text-terracotta transition-all group"
+                          >
+                            <UserIcon size={16} className="group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Gérer mon profil</span>
+                          </Link>
+                          
+                          <Link 
+                            to="/settings" 
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 h-12 rounded-xl text-foreground/70 hover:bg-terracotta/[0.03] hover:text-terracotta transition-all group"
+                          >
+                            <Settings size={16} className="group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Paramètres</span>
+                          </Link>
+                        </div>
+
+                        <div className="mt-2 pt-2 border-t border-terracotta/5">
+                          <button 
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-4 h-12 rounded-xl text-red-500 hover:bg-red-50 transition-all group"
+                          >
+                            <LogOut size={16} className="group-hover:translate-x-1 transition-transform" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Se déconnecter</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
@@ -250,7 +312,11 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
               </div>
 
               <div className="mb-8 px-2">
-                 <div className="bg-sand/20 rounded-2xl p-4 flex items-center justify-between border border-terracotta/5">
+                 <Link 
+                  to="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="bg-sand/20 rounded-2xl p-4 flex items-center justify-between border border-terracotta/5 hover:bg-sand/30 transition-colors group"
+                 >
                     <div className="flex items-center gap-3">
                        <Avatar className="h-10 w-10 rounded-xl border-2 border-white shadow-sm shrink-0">
                           {user?.avatar && <AvatarImage src={user.avatar} />}
@@ -258,12 +324,13 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                              {user ? getInitials(user.name) : 'U'}
                           </AvatarFallback>
                        </Avatar>
-                       <div className="min-w-0">
-                          <p className="text-xs font-black truncate">{user?.name}</p>
+                       <div className="min-w-0 text-left">
+                          <p className="text-xs font-black truncate text-foreground">{user?.name}</p>
                           <p className="text-[9px] uppercase font-mono tracking-widest text-terracotta font-bold mt-0.5">{user?.role}</p>
                        </div>
                     </div>
-                 </div>
+                    <ChevronRight size={16} className="text-terracotta/40 group-hover:translate-x-1 transition-transform" />
+                 </Link>
               </div>
 
               <nav className="flex-1 space-y-1.5 px-1 overflow-y-auto">

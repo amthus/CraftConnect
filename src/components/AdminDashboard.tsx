@@ -51,26 +51,155 @@ const chartData = [
 export default function AdminDashboard() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'artisans' | 'orders'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'artisans' | 'orders' | 'users'>('overview');
   
   // Real state for stock management (simulated for now)
   const [localProducts, setLocalProducts] = useState(PRODUCTS);
   const [localArtisans, setLocalArtisans] = useState(ARTISANS);
+  const [localOrders, setLocalOrders] = useState([
+    { id: "#00321", date: "12 Avril 14:30", client: "Sophie Lefebvre", status: "Expédié", total: 290, statusType: "warning" as const },
+    { id: "#00320", date: "12 Avril 10:15", client: "Marc Dupont", status: "Livré", total: 450, statusType: "success" as const },
+    { id: "#00319", date: "11 Avril 18:45", client: "Elena Rossi", status: "Payé", total: 180, statusType: "default" as const },
+    { id: "#00318", date: "11 Avril 11:20", client: "Jean Valjean", status: "Annulé", total: 1200, statusType: "error" as const },
+  ]);
+  const [localUsers, setLocalUsers] = useState([
+    { id: "USR-001", name: "Aurelien Zankou", email: "aurelien.zankou@example.com", role: "client", status: "Actif" },
+    { id: "ADM-001", name: "Admin Bénin", email: "admin@beninartisan.com", role: "admin", status: "Actif" },
+    { id: "ART-001", name: "Koffi l'Ancien", email: "koffi@artisan.com", role: "artisan", status: "Inactif" }
+  ]);
+
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddArtisanOpen, setIsAddArtisanOpen] = useState(false);
-
-  const handleDeleteProduct = (id: string) => {
-    setLocalProducts(prev => prev.filter(p => p.id !== id));
-    toast.success("Produit supprimé avec succès");
-  };
-
-  const handleDeleteArtisan = (id: string) => {
-    setLocalArtisans(prev => prev.filter(a => a.id !== id));
-    toast.success("Artisan retiré du réseau");
-  };
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingArtisan, setEditingArtisan] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [viewingOrder, setViewingOrder] = useState<any>(null);
+
+  const handleDeleteProduct = (id: string) => {
+    if(confirm("Supprimer ce produit ?")) {
+      setLocalProducts(prev => prev.filter(p => p.id !== id));
+      toast.success("Produit supprimé avec succès");
+    }
+  };
+
+  const handleDeleteArtisan = (id: string) => {
+    if(confirm("Supprimer cet artisan ?")) {
+      setLocalArtisans(prev => prev.filter(a => a.id !== id));
+      toast.success("Artisan retiré du réseau");
+    }
+  };
+
+  const handleDeleteUser = (id: string) => {
+    if(confirm("Révoquer l'accès de cet utilisateur ?")) {
+      setLocalUsers(prev => prev.filter(u => u.id !== id));
+      toast.success("Utilisateur supprimé");
+    }
+  };
+
+  const handleDeleteOrder = (id: string) => {
+    if(confirm("Supprimer cette commande des registres ?")) {
+      setLocalOrders(prev => prev.filter(o => o.id !== id));
+      toast.success("Commande archivée");
+    }
+  };
+
+  const handleCreateProduct = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newProduct = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: formData.get('name') as string,
+      category: formData.get('category') as string,
+      price: Number(formData.get('price')),
+      stock: Number(formData.get('stock')),
+      origin: "Bénin",
+      image: "https://picsum.photos/seed/new/400/400",
+      artisanId: "art-1",
+      soulOfObject: formData.get('description') as string,
+      textureLabel: "Standard"
+    };
+    setLocalProducts([newProduct, ...localProducts]);
+    toast.success("Pièce ajoutée au catalogue");
+    setIsAddProductOpen(false);
+  };
+
+  const handleUpdateProduct = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setLocalProducts(prev => prev.map(p => p.id === editingProduct.id ? {
+      ...p,
+      name: formData.get('name') as string,
+      category: formData.get('category') as string,
+      price: Number(formData.get('price')),
+      stock: Number(formData.get('stock')),
+      soulOfObject: formData.get('description') as string,
+    } : p));
+    toast.success("Fiche produit mise à jour");
+    setEditingProduct(null);
+  };
+
+  const handleCreateArtisan = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newArtisan = {
+      id: `art-${localArtisans.length + 1}`,
+      name: formData.get('name') as string,
+      specialty: formData.get('specialty') as string,
+      bio: formData.get('bio') as string,
+      journey: "Nouveau membre du réseau",
+      location: "Bénin",
+      techniques: [],
+      image: "https://i.pravatar.cc/150?u=new",
+      works: []
+    };
+    setLocalArtisans([newArtisan, ...localArtisans]);
+    toast.success("Artisan recruté");
+    setIsAddArtisanOpen(false);
+  };
+
+  const handleUpdateArtisan = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setLocalArtisans(prev => prev.map(a => a.id === editingArtisan.id ? {
+      ...a,
+      name: formData.get('name') as string,
+      specialty: formData.get('specialty') as string,
+      bio: formData.get('bio') as string,
+    } : a));
+    toast.success("Profil artisan mis à jour");
+    setEditingArtisan(null);
+  };
+
+  const handleCreateUser = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newUser = {
+      id: `USR-${Math.floor(Math.random() * 999)}`,
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      role: formData.get('role') as any,
+      status: "Actif"
+    };
+    setLocalUsers([newUser, ...localUsers]);
+    toast.success("Accès créé");
+    setIsAddUserOpen(false);
+  };
+
+  const handleUpdateUser = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setLocalUsers(prev => prev.map(u => u.id === editingUser.id ? {
+      ...u,
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      role: formData.get('role') as any,
+      status: formData.get('status') as string,
+    } : u));
+    toast.success("Permissions utilisateur modifiées");
+    setEditingUser(null);
+  };
 
   useEffect(() => {
     if (!token || user?.role !== 'admin') {
@@ -297,7 +426,7 @@ export default function AdminDashboard() {
               className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-10 overflow-y-auto max-h-[90vh]"
             >
               <h2 className="text-3xl font-heading mb-8">Nouvelle <span className="text-terracotta">Création</span></h2>
-              <form className="grid gap-6" onSubmit={(e) => { e.preventDefault(); toast.success("Produit ajouté !"); setIsAddProductOpen(false); }}>
+              <form className="grid gap-6" onSubmit={handleCreateProduct}>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom de la pièce</label>
@@ -344,15 +473,15 @@ export default function AdminDashboard() {
               className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-10 overflow-y-auto max-h-[90vh]"
             >
               <h2 className="text-3xl font-heading mb-8">Éditer <span className="text-terracotta">La Pièce</span></h2>
-              <form className="grid gap-6" onSubmit={(e) => { e.preventDefault(); toast.success("Produit mis à jour !"); setEditingProduct(null); }}>
+              <form className="grid gap-6" onSubmit={handleUpdateProduct}>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom de la pièce</label>
-                    <input type="text" defaultValue={editingProduct.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none focus:ring-1 focus:ring-terracotta" required />
+                    <input name="name" type="text" defaultValue={editingProduct.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none focus:ring-1 focus:ring-terracotta" required />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Catégorie</label>
-                    <select className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" defaultValue={editingProduct.category} required>
+                    <select name="category" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" defaultValue={editingProduct.category} required>
                       <option>Sculpture</option>
                       <option>Textile</option>
                       <option>Céramique</option>
@@ -361,16 +490,16 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Description</label>
-                  <textarea rows={3} defaultValue={editingProduct.description} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
+                  <textarea name="description" rows={3} defaultValue={editingProduct.description} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Prix (€)</label>
-                    <input type="number" defaultValue={editingProduct.price} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                    <input name="price" type="number" defaultValue={editingProduct.price} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Stock</label>
-                    <input type="number" defaultValue={editingProduct.stock} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                    <input name="stock" type="number" defaultValue={editingProduct.stock} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                   </div>
                 </div>
                 <div className="pt-4 flex gap-4">
@@ -441,18 +570,18 @@ export default function AdminDashboard() {
               className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl p-10"
             >
               <h2 className="text-3xl font-heading mb-8">Nouveau <span className="text-terracotta">Maître Artisan</span></h2>
-              <form className="grid gap-6" onSubmit={(e) => { e.preventDefault(); toast.success("Artisan recruté !"); setIsAddArtisanOpen(false); }}>
+              <form className="grid gap-6" onSubmit={handleCreateArtisan}>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom et Prénom</label>
-                  <input type="text" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                  <input name="name" type="text" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Spécialité</label>
-                  <input type="text" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                  <input name="specialty" type="text" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Bio Express</label>
-                  <textarea rows={3} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
+                  <textarea name="bio" rows={3} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
                 </div>
                 <div className="pt-4 flex gap-4">
                   <Button variant="ghost" onClick={() => setIsAddArtisanOpen(false)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
@@ -471,18 +600,18 @@ export default function AdminDashboard() {
               className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl p-10"
             >
               <h2 className="text-3xl font-heading mb-8">Éditer <span className="text-terracotta">Maître Artisan</span></h2>
-              <form className="grid gap-6" onSubmit={(e) => { e.preventDefault(); toast.success("Infos artisan mises à jour !"); setEditingArtisan(null); }}>
+              <form className="grid gap-6" onSubmit={handleUpdateArtisan}>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom et Prénom</label>
-                  <input type="text" defaultValue={editingArtisan.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                  <input name="name" type="text" defaultValue={editingArtisan.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Spécialité</label>
-                  <input type="text" defaultValue={editingArtisan.specialty} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                  <input name="specialty" type="text" defaultValue={editingArtisan.specialty} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Bio Express</label>
-                  <textarea rows={3} defaultValue={editingArtisan.bio || "Bio non renseignée"} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
+                  <textarea name="bio" rows={3} defaultValue={editingArtisan.bio || "Bio non renseignée"} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
                 </div>
                 <div className="pt-4 flex gap-4">
                   <Button variant="ghost" onClick={() => setEditingArtisan(null)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
@@ -519,20 +648,18 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-terracotta/5">
-              {[
-                { id: "#00321", date: "12 Avril 14:30", client: "Sophie Lefebvre", status: "Expédié", total: "290€", statusType: "warning" as const },
-                { id: "#00320", date: "12 Avril 10:15", client: "Marc Dupont", status: "Livré", total: "450€", statusType: "success" as const },
-                { id: "#00319", date: "11 Avril 18:45", client: "Elena Rossi", status: "Payé", total: "180€", statusType: "default" as const },
-                { id: "#00318", date: "11 Avril 11:20", client: "Jean Valjean", status: "Annulé", total: "1200€", statusType: "error" as const },
-              ].map(order => (
+              {localOrders.map(order => (
                 <tr key={order.id} className="hover:bg-sand/[0.03] transition-colors">
                   <MTableCell className="font-mono font-bold text-terracotta">{order.id}</MTableCell>
                   <MTableCell className="text-[11px] font-mono font-bold text-foreground/40">{order.date}</MTableCell>
                   <MTableCell className="font-bold">{order.client}</MTableCell>
                   <MTableCell><MBadge variant={order.statusType}>{order.status}</MBadge></MTableCell>
-                  <MTableCell className="font-heading text-lg font-medium">{order.total}</MTableCell>
+                  <MTableCell className="font-heading text-lg font-medium">{order.total}€</MTableCell>
                   <MTableCell className="text-right">
-                     <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-terracotta/10 text-terracotta"><Eye size={16} /></Button>
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-terracotta/10 text-terracotta" onClick={() => setViewingOrder(order)}><Eye size={16} /></Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-red-50 text-red-500" onClick={() => handleDeleteOrder(order.id)}><Trash2 size={16} /></Button>
+                      </div>
                   </MTableCell>
                 </tr>
               ))}
@@ -540,6 +667,128 @@ export default function AdminDashboard() {
           </table>
         </div>
       </MCard>
+    </div>
+  );
+
+  const renderUsers = () => (
+    <div className="space-y-12">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+        <div>
+          <h3 className="text-2xl font-heading tracking-tight">Gestion des <span className="text-terracotta">Accès</span></h3>
+          <p className="text-[9px] font-mono font-bold uppercase tracking-widest text-foreground/20 mt-1">Contrôle des utilisateurs et privilèges système</p>
+        </div>
+        <Button 
+          onClick={() => setIsAddUserOpen(true)}
+          className="bg-terracotta rounded-xl px-8 h-11 text-[10px] uppercase font-black tracking-widest shadow-lg shadow-terracotta/20 hover:scale-105 transition-all"
+        >
+          <Plus size={16} className="mr-2" /> Créer un Utilisateur
+        </Button>
+      </div>
+
+      <MCard className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-sand/10">
+                <MTableHead>Identité</MTableHead>
+                <MTableHead>Email</MTableHead>
+                <MTableHead>Rôle</MTableHead>
+                <MTableHead>Statut</MTableHead>
+                <th className="px-8 border-b border-terracotta/5"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-terracotta/5">
+              {localUsers.map(u => (
+                <tr key={u.id} className="hover:bg-sand/[0.03] transition-colors">
+                  <MTableCell className="font-bold">{u.name}</MTableCell>
+                  <MTableCell className="text-[11px] font-mono font-bold text-foreground/40">{u.email}</MTableCell>
+                  <MTableCell><MBadge variant="default">{u.role}</MBadge></MTableCell>
+                  <MTableCell><MBadge variant={u.status === 'Actif' ? 'success' : 'error'}>{u.status}</MBadge></MTableCell>
+                  <MTableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-terracotta/10 text-terracotta" onClick={() => setEditingUser(u)}><Edit size={16} /></Button>
+                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-red-50 text-red-500" onClick={() => handleDeleteUser(u.id)}><Trash2 size={16} /></Button>
+                    </div>
+                  </MTableCell>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </MCard>
+
+      <AnimatePresence>
+        {isAddUserOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsAddUserOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl p-10">
+              <h2 className="text-3xl font-heading mb-8">Nouveau <span className="text-terracotta">Profil</span></h2>
+              <form className="grid gap-6" onSubmit={handleCreateUser}>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom complet</label>
+                  <input name="name" type="text" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Email</label>
+                  <input name="email" type="email" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Rôle</label>
+                  <select name="role" className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required>
+                    <option value="client">Collectionneur</option>
+                    <option value="artisan">Artisan</option>
+                    <option value="admin">Administrateur</option>
+                  </select>
+                </div>
+                <div className="pt-4 flex gap-4">
+                  <Button variant="ghost" onClick={() => setIsAddUserOpen(false)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
+                  <Button type="submit" className="flex-1 h-12 bg-terracotta text-white rounded-xl uppercase font-black text-[10px] tracking-widest shadow-lg shadow-terracotta/20">Créer l'accès</Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {editingUser && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingUser(null)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl p-10">
+              <h2 className="text-3xl font-heading mb-8">Éditer <span className="text-terracotta">Profil</span></h2>
+              <form className="grid gap-6" onSubmit={handleUpdateUser}>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom complet</label>
+                  <input name="name" type="text" defaultValue={editingUser.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Email</label>
+                  <input name="email" type="email" defaultValue={editingUser.email} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required />
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Rôle</label>
+                    <select name="role" defaultValue={editingUser.role} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required>
+                      <option value="client">Collectionneur</option>
+                      <option value="artisan">Artisan</option>
+                      <option value="admin">Administrateur</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Statut</label>
+                    <select name="status" defaultValue={editingUser.status} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" required>
+                      <option value="Actif">Actif</option>
+                      <option value="Inactif">Suspendu</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="pt-4 flex gap-4">
+                  <Button variant="ghost" onClick={() => setEditingUser(null)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
+                  <Button type="submit" className="flex-1 h-12 bg-terracotta text-white rounded-xl uppercase font-black text-[10px] tracking-widest shadow-lg shadow-terracotta/20">Sauvegarder</Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 
@@ -551,7 +800,8 @@ export default function AdminDashboard() {
             { id: 'overview', label: 'Dashboard', icon: <TrendingUp size={16}/> },
             { id: 'products', label: 'Stocks & Produits', icon: <Package size={16}/> },
             { id: 'artisans', label: 'Artisans', icon: <Users size={16}/> },
-            { id: 'orders', label: 'Commandes', icon: <ShoppingBag size={16}/> }
+            { id: 'orders', label: 'Commandes', icon: <ShoppingBag size={16}/> },
+            { id: 'users', label: 'Utilisateurs', icon: <Users size={16}/> }
           ].map(tab => (
             <button
               key={tab.id}
@@ -582,7 +832,40 @@ export default function AdminDashboard() {
           {activeTab === 'products' && renderProducts()}
           {activeTab === 'artisans' && renderArtisans()}
           {activeTab === 'orders' && renderOrders()}
+          {activeTab === 'users' && renderUsers()}
         </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {viewingOrder && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setViewingOrder(null)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-10">
+               <h2 className="text-2xl font-heading mb-6">Détails de la <span className="text-terracotta">Commande {viewingOrder.id}</span></h2>
+               <div className="space-y-6">
+                  <div className="flex justify-between items-center border-b border-terracotta/5 pb-4">
+                     <p className="text-[10px] uppercase font-mono font-bold text-foreground/40">Client</p>
+                     <p className="font-bold">{viewingOrder.client}</p>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-terracotta/5 pb-4">
+                     <p className="text-[10px] uppercase font-mono font-bold text-foreground/40">Date</p>
+                     <p className="font-mono text-xs">{viewingOrder.date}</p>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-terracotta/5 pb-4">
+                     <p className="text-[10px] uppercase font-mono font-bold text-foreground/40">Montant</p>
+                     <p className="text-xl font-heading text-terracotta">{viewingOrder.total}€</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                     <p className="text-[10px] uppercase font-mono font-bold text-foreground/40">Statut Actuel</p>
+                     <MBadge variant={viewingOrder.statusType}>{viewingOrder.status}</MBadge>
+                  </div>
+               </div>
+               <div className="mt-10">
+                  <Button className="w-full h-12 bg-terracotta rounded-xl uppercase font-black text-[10px] tracking-widest" onClick={() => setViewingOrder(null)}>Fermer</Button>
+               </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </DashboardLayout>
   );

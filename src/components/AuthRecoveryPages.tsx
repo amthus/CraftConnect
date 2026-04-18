@@ -22,30 +22,30 @@ export const ForgotPasswordPage = () => {
   return (
     <div className="min-h-screen bg-sand/30 font-sans pb-20">
       <Nav />
-      <div className="pt-32 pb-16 px-4 flex justify-center">
+      <div className="pt-24 pb-16 px-4 flex justify-center">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md glass p-10 rounded-[2.5rem] border border-terracotta/10 shadow-2xl shadow-terracotta/5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm glass p-8 rounded-[2rem] border border-terracotta/10 shadow-2xl shadow-terracotta/5"
         >
-          <div className="text-center mb-10">
-            <div className="h-16 w-16 bg-terracotta/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <KeyRound className="text-terracotta" size={32} />
+          <div className="text-center mb-8">
+            <div className="h-12 w-12 bg-terracotta/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <KeyRound className="text-terracotta" size={24} />
             </div>
-            <h1 className="text-3xl font-heading mb-2">Oubli de Clé</h1>
-            <p className="text-xs text-muted-foreground font-serif italic">Retrouvez l'accès à votre galerie</p>
+            <h1 className="text-2xl font-heading mb-1">Oubli de Clé</h1>
+            <p className="text-[10px] text-muted-foreground font-serif italic">Retrouvez l'accès à votre galerie</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-[9px] uppercase font-black tracking-widest opacity-40 ml-4">Email</label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[8px] uppercase font-bold tracking-[0.2em] opacity-40 ml-4 font-mono">Email</label>
               <div className="relative">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-terracotta/40" size={16} />
+                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-terracotta/40" size={14} />
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 pl-12 pr-6 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-2 focus:ring-terracotta outline-none transition-all text-sm"
+                  className="w-full h-11 pl-12 pr-5 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-1 focus:ring-terracotta outline-none transition-all text-[13px] font-sans"
                   placeholder="votre@email.com"
                   required
                 />
@@ -55,15 +55,15 @@ export const ForgotPasswordPage = () => {
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full h-14 bg-terracotta text-white rounded-full text-[10px] uppercase font-black tracking-[0.2em] shadow-lg hover:bg-terracotta/90 transition-all active:scale-95"
+              className="w-full h-11 bg-terracotta text-white rounded-xl text-[9px] uppercase font-black tracking-[0.2em] shadow-lg shadow-terracotta/10 hover:bg-terracotta transition-all active:scale-[0.98]"
             >
               {isSubmitting ? 'Envoi...' : 'Envoyer le Lien'}
             </Button>
           </form>
 
-          <div className="mt-10 pt-10 border-t border-terracotta/5 flex flex-col items-center gap-6">
-            <Link to="/login" className="text-xs text-muted-foreground flex items-center gap-2 hover:text-terracotta transition-colors">
-              <ArrowLeft size={14} /> Retour à la connexion
+          <div className="mt-8 pt-8 border-t border-terracotta/5 flex flex-col items-center gap-4">
+            <Link to="/login" className="text-[10px] text-muted-foreground flex items-center gap-2 hover:text-terracotta transition-colors">
+              <ArrowLeft size={12} /> Retour à la connexion
             </Link>
           </div>
         </motion.div>
@@ -95,39 +95,39 @@ export const ResetPasswordPage = () => {
     return (
     <div className="min-h-screen bg-sand/30 font-sans pb-20">
       <Nav />
-      <div className="pt-32 pb-16 px-4 flex justify-center">
+      <div className="pt-24 pb-16 px-4 flex justify-center">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md glass p-10 rounded-[2.5rem] border border-terracotta/10 shadow-2xl shadow-terracotta/5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm glass p-8 rounded-[2rem] border border-terracotta/10 shadow-2xl shadow-terracotta/5"
         >
-          <div className="text-center mb-10">
-            <div className="h-16 w-16 bg-terracotta/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <ShieldCheck className="text-terracotta" size={32} />
+          <div className="text-center mb-8">
+            <div className="h-12 w-12 bg-terracotta/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="text-terracotta" size={24} />
             </div>
-            <h1 className="text-3xl font-heading mb-2">Nouveau Souffle</h1>
-            <p className="text-xs text-muted-foreground font-serif italic">Définissez votre nouveau secret</p>
+            <h1 className="text-2xl font-heading mb-1">Nouveau Souffle</h1>
+            <p className="text-[10px] text-muted-foreground font-serif italic">Définissez votre nouveau secret</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-[9px] uppercase font-black tracking-widest opacity-40 ml-4">Nouveau mot de passe</label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[8px] uppercase font-bold tracking-[0.2em] opacity-40 ml-4 font-mono">Nouveau mot de passe</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-6 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-2 focus:ring-terracotta outline-none transition-all text-sm"
+                className="w-full h-11 px-5 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-1 focus:ring-terracotta outline-none transition-all text-[13px] font-sans"
                 placeholder="••••••••"
                 required
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[9px] uppercase font-black tracking-widest opacity-40 ml-4">Confirmer le mot de passe</label>
+            <div className="space-y-1.5">
+              <label className="text-[8px] uppercase font-bold tracking-[0.2em] opacity-40 ml-4 font-mono">Confirmer le mot de passe</label>
               <input 
                 type="password" 
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full h-12 px-6 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-2 focus:ring-terracotta outline-none transition-all text-sm"
+                className="w-full h-11 px-5 bg-white/50 border border-terracotta/5 rounded-xl focus:ring-1 focus:ring-terracotta outline-none transition-all text-[13px] font-sans"
                 placeholder="••••••••"
                 required
               />
@@ -136,7 +136,7 @@ export const ResetPasswordPage = () => {
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full h-14 bg-terracotta text-white rounded-full text-[10px] uppercase font-black tracking-[0.2em] shadow-lg hover:bg-terracotta/90 transition-all active:scale-95"
+              className="w-full h-11 bg-terracotta text-white rounded-xl text-[9px] uppercase font-black tracking-[0.2em] shadow-lg shadow-terracotta/10 hover:bg-terracotta transition-all active:scale-[0.98]"
             >
               {isSubmitting ? 'Mise à jour...' : 'Réinitialiser'}
             </Button>

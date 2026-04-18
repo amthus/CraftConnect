@@ -14,6 +14,7 @@ import ArtisansPage from './components/ArtisansPage';
 import CustomOrderPage from './components/CustomOrderPage';
 import { PrivacyPolicy, TermsConditions } from './components/LegalPages';
 import ContactPage from './components/ContactPage';
+import ProfilePage from './components/ProfilePage';
 import { CartProvider } from './lib/CartContext';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { Toaster } from 'sonner';
@@ -73,6 +74,8 @@ export default function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/settings" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             </Routes>
           </ErrorBoundary>
         </Router>
