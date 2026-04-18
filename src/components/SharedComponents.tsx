@@ -101,10 +101,8 @@ export const Nav = () => {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 bg-terracotta text-white rounded-full text-[9px] flex items-center justify-center font-bold"
-                    >
-                      {wishlistItems.length}
-                    </motion.span>
+                      className="absolute top-1 right-1 h-2.5 w-2.5 bg-red-600 rounded-full border border-white shadow-sm ring-2 ring-red-600/20"
+                    />
                   )}
                 </AnimatePresence>
               </Button>
@@ -262,31 +260,49 @@ export const WishlistSidebar = () => {
             </div>
           ) : (
             wishlistItems.map((item, idx) => (
-              <div key={idx} className="flex gap-4 items-center group">
-                <div className="h-16 w-16 aspect-square rounded-lg overflow-hidden border border-terracotta/10">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-sm tracking-tight">{item.name}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">{item.price}€</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => { addToBag(item); removeFromWishlist(item.id); }}
-                    className="h-8 w-8 text-terracotta hover:bg-terracotta hover:text-white rounded-full"
-                  >
-                    <ShoppingBag size={14} />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => removeFromWishlist(item.id)}
-                    className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-full"
-                  >
-                    <X size={14} />
-                  </Button>
+              <div key={idx} className="flex flex-col border-b border-terracotta/5 pb-4 last:border-0 group">
+                <div className="flex gap-4 items-center">
+                  <div className="h-16 w-16 aspect-square rounded-lg overflow-hidden border border-terracotta/10">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-sm tracking-tight">{item.name}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">{item.price}€</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => { addToBag(item); removeFromWishlist(item.id); }}
+                      className="h-8 w-8 text-terracotta hover:bg-terracotta hover:text-white rounded-full"
+                    >
+                      <ShoppingBag size={14} />
+                    </Button>
+                    <Dialog>
+                      <DialogTrigger 
+                        nativeButton={true}
+                        render={
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-full"
+                        >
+                          <X size={14} />
+                        </Button>
+                        }
+                      />
+                      <DialogContent className="sm:max-w-[300px] glass p-6 border-terracotta/20 text-center">
+                        <DialogHeader>
+                          <DialogTitle className="text-lg font-heading text-terracotta mb-2">Confirmation</DialogTitle>
+                        </DialogHeader>
+                        <p className="text-xs text-muted-foreground font-serif italic mb-6">Êtes-vous sûr de vouloir retirer cet article de votre liste ?</p>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1 rounded-full text-[10px] uppercase font-bold" onClick={() => {}}>Annuler</Button>
+                          <Button variant="destructive" className="flex-1 rounded-full text-[10px] uppercase font-bold" onClick={() => removeFromWishlist(item.id)}>Retirer</Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
               </div>
             ))
@@ -309,76 +325,148 @@ export const WishlistSidebar = () => {
 
 export const CartSidebar = () => {
   const { bagItems, isBagOpen, setIsBagOpen, removeFromBag, shippingCountry, setShippingCountry, totalBagPrice } = useCart();
+  const [step, setStep] = useState<'items' | 'confirm'>('items');
   const currentCountry = COUNTRIES.find(c => c.name === shippingCountry) || COUNTRIES[0];
   const shippingCost = currentCountry.shipping;
   const customsDuties = totalBagPrice * currentCountry.duties;
   const finalTotal = totalBagPrice + shippingCost + customsDuties;
 
+  // Reset step when bag closes
+  useEffect(() => {
+    if (!isBagOpen) setStep('items');
+  }, [isBagOpen]);
+
   return (
     <Dialog open={isBagOpen} onOpenChange={setIsBagOpen}>
-      <DialogContent className="sm:max-w-md glass border-terracotta/20 p-8 font-sans">
-        <DialogHeader>
-          <DialogTitle className="text-3xl font-heading text-terracotta">Mon Panier</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-6 pt-4 max-h-[40vh] overflow-y-auto pr-2">
-          {bagItems.length === 0 ? (
-            <div className="text-center py-12">
-              <ShoppingBag className="mx-auto text-terracotta/20 mb-4" size={48} />
-              <p className="text-sm font-serif italic text-muted-foreground">Votre panier est vide.</p>
-            </div>
-          ) : (
-            bagItems.map((item, idx) => (
-              <div key={idx} className="flex gap-4 items-center">
-                <div className="h-16 w-16 aspect-square rounded-lg overflow-hidden border border-terracotta/10">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-sm tracking-tight">{item.name}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">{ARTISANS.find(a => a.id === item.artisanId)?.name}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-heading text-terracotta text-sm">{item.price}€</p>
-                  <button onClick={() => removeFromBag(item.id)} className="text-[10px] text-destructive hover:underline">Retirer</button>
-                </div>
-              </div>
-            ))
-          )}
+      <DialogContent className="sm:max-w-md glass border-terracotta/20 p-0 overflow-hidden font-sans">
+        <div className="p-8 pb-0">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-heading text-terracotta">
+              {step === 'items' ? 'Mon Panier' : 'Confirmation'}
+            </DialogTitle>
+          </DialogHeader>
         </div>
-        {bagItems.length > 0 && (
-          <div className="pt-6 border-t border-terracotta/10 space-y-4">
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase font-black opacity-50">Pays de Livraison</label>
-              <select 
-                value={shippingCountry}
-                onChange={(e) => setShippingCountry(e.target.value)}
-                className="w-full bg-white/50 border border-terracotta/20 rounded-xl px-4 h-10 text-xs focus:ring-1 focus:ring-terracotta outline-none"
+
+        <div className="p-8 pt-4">
+          <AnimatePresence mode="wait">
+            {step === 'items' ? (
+              <motion.div 
+                key="items"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-6"
               >
-                {COUNTRIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-              </select>
-            </div>
-            <div className="space-y-2 text-[10px] uppercase tracking-widest font-bold opacity-60">
-              <div className="flex justify-between">
-                <span>Sous-total pièces</span>
-                <span>{totalBagPrice}€</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Frais d'expédition</span>
-                <span>{shippingCost}€</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Estimations Douanes</span>
-                <span>{customsDuties.toFixed(2)}€</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-end pt-2 border-t border-terracotta/5">
-              <span className="text-xs uppercase font-black opacity-80">Total Final</span>
-              <span className="text-3xl font-heading text-terracotta">{finalTotal.toFixed(2)}€</span>
-            </div>
-            <Button className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-12 text-xs uppercase tracking-widest font-bold shadow-lg shadow-terracotta/20">
-              Accéder au Paiement Sécurisé
-            </Button>
-          </div>
-        )}
+                <div className="space-y-6 max-h-[40vh] overflow-y-auto pr-2">
+                  {bagItems.length === 0 ? (
+                    <div className="text-center py-12">
+                      <ShoppingBag className="mx-auto text-terracotta/20 mb-4" size={48} />
+                      <p className="text-sm font-serif italic text-muted-foreground">Votre panier est vide.</p>
+                    </div>
+                  ) : (
+                    bagItems.map((item, idx) => (
+                      <div key={idx} className="flex gap-4 items-center">
+                        <div className="h-16 w-16 aspect-square rounded-lg overflow-hidden border border-terracotta/10">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-sm tracking-tight">{item.name}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase">{ARTISANS.find(a => a.id === item.artisanId)?.name}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-heading text-terracotta text-sm">{item.price}€</p>
+                          <button onClick={() => removeFromBag(item.id)} className="text-[10px] text-destructive hover:underline">Retirer</button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {bagItems.length > 0 && (
+                  <div className="pt-6 border-t border-terracotta/10 space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase font-black opacity-50">Pays de Livraison</label>
+                      <select 
+                        value={shippingCountry}
+                        onChange={(e) => setShippingCountry(e.target.value)}
+                        className="w-full bg-white/50 border border-terracotta/20 rounded-xl px-4 h-10 text-xs focus:ring-1 focus:ring-terracotta outline-none"
+                      >
+                        {COUNTRIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    
+                    <div className="flex justify-between items-end pt-2">
+                      <span className="text-xs uppercase font-black opacity-80">Total estimé</span>
+                      <span className="text-3xl font-heading text-terracotta">{finalTotal.toFixed(2)}€</span>
+                    </div>
+
+                    <Button 
+                      onClick={() => setStep('confirm')}
+                      className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-12 text-xs uppercase tracking-widest font-bold shadow-lg shadow-terracotta/20"
+                    >
+                      Vérifier ma commande
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="confirm"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="bg-sand/30 p-6 rounded-2xl border border-terracotta/10 space-y-4">
+                  <h4 className="text-[10px] uppercase font-black tracking-widest text-terracotta border-b border-terracotta/10 pb-2">Récapitulatif</h4>
+                  
+                  <div className="max-h-[20vh] overflow-y-auto space-y-2 pr-2">
+                    {bagItems.map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-xs">
+                        <span className="font-medium line-clamp-1 flex-1 pr-4">{item.name}</span>
+                        <span className="font-bold">{item.price}€</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-2 space-y-2 text-[10px] uppercase tracking-widest font-bold opacity-70">
+                    <div className="flex justify-between items-center bg-white/40 p-2 rounded-lg">
+                      <span className="flex items-center gap-2 font-black text-terracotta"><MapPin size={12} /> Livraison : {shippingCountry}</span>
+                      <span>{shippingCost}€</span>
+                    </div>
+                    <div className="flex justify-between px-2">
+                      <span>Estimations Douanes</span>
+                      <span>{customsDuties.toFixed(2)}€</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-terracotta/20 flex justify-between items-end">
+                    <span className="text-sm uppercase font-black">Total Final</span>
+                    <div className="text-right">
+                      <p className="text-3xl font-heading text-terracotta">{finalTotal.toFixed(2)}€</p>
+                      <p className="text-[8px] uppercase tracking-tighter opacity-40">Taxes et frais inclus</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Button 
+                    className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-14 text-xs uppercase tracking-widest font-bold shadow-xl shadow-terracotta/30"
+                  >
+                    Confirmer et Payer
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setStep('items')}
+                    className="w-full text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-terracotta"
+                  >
+                    Retour au panier
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -468,166 +556,50 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       className="group relative flex flex-col p-3 md:p-4 bg-white/40 glass rounded-3xl transition-all duration-300 hover:shadow-2xl hover:shadow-terracotta/5 border border-transparent hover:border-terracotta/10"
     >
       <div className="relative w-full aspect-[3/4] mb-4 md:mb-6">
-        <Dialog>
-          <DialogTrigger 
-            nativeButton={true}
-            render={<button className="relative w-full h-full overflow-hidden rounded-2xl shadow-xl border border-terracotta/5 cursor-pointer group/card focus:outline-none" />}
+        <Link to={`/product/${product.id}`} className="relative block w-full h-full overflow-hidden rounded-2xl shadow-xl border border-terracotta/5 cursor-pointer group/card focus:outline-none">
+          <div 
+            className="w-full h-full relative"
+            onMouseEnter={() => setIsZooming(true)}
+            onMouseLeave={() => setIsZooming(false)}
           >
-            <div 
-              className="w-full h-full relative"
-              onMouseEnter={() => setIsZooming(true)}
-              onMouseLeave={() => setIsZooming(false)}
-            >
-              {!imageError ? (
-                <motion.img 
-                  src={product.image} 
-                  alt={product.name} 
-                  onError={() => setImageError(true)}
-                  animate={{ scale: isZooming ? 1.05 : 1 }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className={`h-full w-full object-cover origin-center ${product.stock === 0 ? 'grayscale opacity-60' : ''}`}
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-sand/30 font-heading text-4xl text-terracotta/20 select-none">
-                  {getInitials(product.name)}
-                </div>
-              )}
-              <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors duration-500" />
-              <div className="absolute top-4 left-4">
-                <Badge className="bg-white/90 backdrop-blur-md text-terracotta text-[8px] md:text-[9px] px-2 py-0.5 uppercase tracking-widest border border-terracotta/10">{product.category}</Badge>
+            {!imageError ? (
+              <motion.img 
+                src={product.image} 
+                alt={product.name} 
+                onError={() => setImageError(true)}
+                animate={{ scale: isZooming ? 1.05 : 1 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className={`h-full w-full object-cover origin-center ${product.stock === 0 ? 'grayscale opacity-60' : ''}`}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-sand/30 font-heading text-4xl text-terracotta/20 select-none">
+                {getInitials(product.name)}
               </div>
-              {product.stock === 0 ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-black/80 backdrop-blur-xl px-6 md:px-8 py-2 md:py-3 rounded-full text-[9px] md:text-[11px] uppercase font-black tracking-[0.25em] text-white border border-terracotta/30 shadow-lg">
-                    <span className="flex items-center gap-2">
-                      <X size={12} className="text-terracotta" />
-                      Indisponible
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500">
-                  <div className="glass px-6 py-3 rounded-full text-[10px] uppercase font-black tracking-[0.2em] text-white">Consulter</div>
-                </div>
-              )}
+            )}
+            <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors duration-500" />
+            <div className="absolute top-4 left-4">
+              <Badge className="bg-white/90 backdrop-blur-md text-terracotta text-[8px] md:text-[9px] px-2 py-0.5 uppercase tracking-widest border border-terracotta/10">{product.category}</Badge>
             </div>
-          </DialogTrigger>
-
-          <DialogContent className="w-[95vw] sm:max-w-[900px] glass p-0 overflow-hidden border-terracotta/20 font-sans max-h-[95vh] sm:max-h-[90vh]">
-            <div className="flex flex-col md:flex-row h-full overflow-y-auto md:overflow-hidden">
-                <div className="md:w-1/2 aspect-[4/3] md:aspect-auto relative bg-sand/20 shrink-0">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                  <div className="absolute top-4 left-4 md:top-6 md:left-6">
-                    <Badge className="bg-white/80 backdrop-blur-md text-terracotta px-3 py-0.5 md:px-4 md:py-1 uppercase text-[10px] md:text-xs tracking-widest">{product.category}</Badge>
-                  </div>
-                </div>
-                <div className="md:w-1/2 p-6 md:p-12 space-y-6 md:space-y-8 overflow-y-auto">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="space-y-1">
-                      <h2 className="text-2xl md:text-5xl font-heading leading-tight">{product.name}</h2>
-                      <p className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-2 uppercase tracking-[0.2em] font-bold">
-                        <MapPin size={12} className="text-terracotta" /> {product.origin}
-                      </p>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => addToWishlist(product)}
-                      className={`h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0 ${itemInWishlist ? 'text-terracotta bg-terracotta/10' : 'hover:bg-terracotta/5'}`}
-                    >
-                      <Heart size={20} className="md:w-7 md:h-7" fill={itemInWishlist ? "currentColor" : "none"} />
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-2 md:space-y-3">
-                    <p className="text-[9px] md:text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">L'Âme de l'Objet</p>
-                    <p className="font-serif italic text-base md:text-xl leading-relaxed text-muted-foreground border-l-2 border-terracotta/20 pl-4 md:pl-6">"{product.soulOfObject}"</p>
-                  </div>
-
-                  <div className="space-y-2 md:space-y-3">
-                    <p className="text-[9px] md:text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">Détails de Texture</p>
-                    <TextureVisualizer image={product.image} label={product.textureLabel} />
-                  </div>
-
-                  <div className="flex items-center gap-3 md:gap-4 p-4 md:p-5 glass border border-terracotta/10 rounded-2xl">
-                    <Avatar className="h-10 w-10 md:h-14 md:w-14 border border-terracotta/20 shadow-inner">
-                      <AvatarImage src={artisan.image} />
-                      <AvatarFallback>{artisan.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="text-[8px] md:text-[9px] uppercase font-black opacity-40 tracking-wider">Maître Artisan</p>
-                      <p className="font-bold text-sm md:text-lg">{artisan.name}</p>
-                      <p className="text-[10px] md:text-xs text-muted-foreground font-serif italic">{artisan.location}</p>
-                    </div>
-                    <Link to={`/#artisans`}>
-                       <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full"><ChevronRight size={16}/></Button>
-                    </Link>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 md:gap-6 pt-4 border-t border-terracotta/10">
-                    <div className="text-center sm:text-left space-y-0.5">
-                      <p className="text-[8px] md:text-[10px] uppercase font-black opacity-40">Prix d'acquisition</p>
-                      <span className="text-2xl md:text-4xl font-heading text-terracotta">{product.price}€</span>
-                    </div>
-                    <Button 
-                      onClick={() => addToBag(product)} 
-                      disabled={product.stock === 0}
-                      className={`w-full sm:flex-1 rounded-full h-12 md:h-16 text-xs uppercase font-black tracking-widest shadow-xl transition-all active:scale-95 ${
-                        product.stock === 0 
-                        ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed' 
-                        : 'bg-terracotta hover:bg-terracotta/90 text-white shadow-terracotta/20'
-                      }`}
-                    >
-                      {product.stock === 0 ? 'Hélas, Vendu' : 'Ajouter au Panier'}
-                    </Button>
-                  </div>
-
-                  <div className="pt-8 border-t border-terracotta/10">
-                     <div className="flex items-center justify-between mb-6">
-                        <p className="text-[10px] uppercase font-black text-terracotta tracking-[0.3em] opacity-60">Inspirations liées</p>
-                        <Link to="/marketplace" className="text-[9px] uppercase font-bold text-muted-foreground hover:text-terracotta transition-colors">Tout voir</Link>
-                     </div>
-                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                        {PRODUCTS.filter(item => item.id !== product.id && (item.category === product.category || item.artisanId === product.artisanId)).slice(0, 3).map((item, idx) => (
-                          <motion.div 
-                            key={item.id} 
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.1 * idx }}
-                            className="group/rel relative flex flex-col gap-2 cursor-pointer bg-sand/20 rounded-2xl p-2 border border-transparent hover:border-terracotta/10 hover:bg-white transition-all shadow-sm hover:shadow-md"
-                          >
-                             <div className="relative aspect-square rounded-xl overflow-hidden">
-                                <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover/rel:scale-110" />
-                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/rel:opacity-100 transition-opacity" />
-                                <div className="absolute top-2 right-2 flex gap-1 translate-x-4 opacity-0 group-hover/rel:translate-x-0 group-hover/rel:opacity-100 transition-all">
-                                   <div className="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
-                                      <Eye size={12} className="text-terracotta" />
-                                   </div>
-                                </div>
-                             </div>
-                             <div className="px-1 py-1">
-                                <p className="text-[9px] font-bold text-foreground mb-0.5 line-clamp-1">{item.name}</p>
-                                <div className="flex justify-between items-center">
-                                   <p className="text-[9px] text-terracotta font-black tracking-tight">{item.price}€</p>
-                                   <Badge variant="ghost" className="h-3 text-[7px] px-1 uppercase opacity-40">{item.origin.split(',')[0]}</Badge>
-                                </div>
-                             </div>
-                          </motion.div>
-                        ))}
-                     </div>
-                  </div>
-
-                  <div className="flex justify-center gap-8 pt-4 opacity-60 decoration-terracotta decoration-2 underline-offset-4">
-                    <button className="text-[10px] uppercase font-black tracking-widest hover:text-terracotta transition-colors flex items-center gap-2"><Share2 size={12}/> Partager</button>
-                    <button className="text-[10px] uppercase font-black tracking-widest hover:text-terracotta transition-colors flex items-center gap-2"><ShieldCheck size={12}/> Authenticité</button>
-                  </div>
+            {product.stock === 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-black/80 backdrop-blur-xl px-6 md:px-8 py-2 md:py-3 rounded-full text-[9px] md:text-[11px] uppercase font-black tracking-[0.25em] text-white border border-terracotta/30 shadow-lg">
+                  <span className="flex items-center gap-2">
+                    <X size={12} className="text-terracotta" />
+                    Indisponible
+                  </span>
                 </div>
               </div>
-          </DialogContent>
-        </Dialog>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500">
+                <div className="glass px-6 py-3 rounded-full text-[10px] uppercase font-black tracking-[0.2em] text-white">Consulter</div>
+              </div>
+            )}
+          </div>
+        </Link>
+      </div>
 
-        {/* Action Overlay Buttons */}
+      {/* Action Overlay Buttons */}
         <div className="absolute top-6 right-6 flex flex-col gap-2 z-10 md:translate-x-12 opacity-100 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500">
            <Button 
             onClick={(e) => { e.stopPropagation(); addToWishlist(product); }}
@@ -667,9 +639,8 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
-      
-      <div className="mt-2 text-left">
+
+        <div className="mt-2 text-left">
         <div className="flex justify-between items-center mb-1">
           <Badge variant="outline" className="text-[7px] md:text-[9px] tracking-widest text-terracotta border-terracotta/30 uppercase px-2 py-0.5">{product.category}</Badge>
           <span className="font-heading text-lg md:text-xl text-terracotta/80">{product.price}€</span>
@@ -730,21 +701,21 @@ export const FloatingSupport = () => {
               <div className="absolute -top-1 -right-1 h-3 w-3 bg-emerald-500 rounded-full border-2 border-white" />
             </button>
         } />
-        <DialogContent className="sm:max-w-[420px] glass p-0 border-terracotta/20 font-sans h-[600px] flex flex-col overflow-hidden">
-          <DialogHeader className="p-6 border-b border-terracotta/10 bg-terracotta/5">
-            <DialogTitle className="text-xl font-heading text-terracotta flex items-center gap-3">
-              <Sparkles className="text-terracotta animate-pulse" size={20} />
-              Conciergerie en Direct
+        <DialogContent className="sm:max-w-[380px] glass p-0 border-terracotta/20 font-sans h-[500px] flex flex-col overflow-hidden">
+          <DialogHeader className="p-5 border-b border-terracotta/10 bg-terracotta/5">
+            <DialogTitle className="text-lg font-heading text-terracotta flex items-center gap-2">
+              <Sparkles className="text-terracotta animate-pulse" size={18} />
+              Conciergerie
             </DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3" ref={scrollRef}>
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] leading-relaxed shadow-sm ${
+                <div className={`max-w-[90%] p-2.5 rounded-xl text-[10px] leading-relaxed shadow-sm ${
                   m.role === 'user' 
                   ? 'bg-terracotta text-white rounded-tr-none' 
-                  : 'bg-white text-foreground border border-terracotta/10 rounded-tl-none'
+                  : 'bg-white text-foreground border border-terracotta/10 rounded-tl-none font-serif italic'
                 }`}>
                   {m.text}
                 </div>
@@ -752,22 +723,22 @@ export const FloatingSupport = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-terracotta/10 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
-                  <Loader2 className="animate-spin text-terracotta" size={12} />
-                  <span className="text-[10px] text-muted-foreground">La Concierge prépare sa réponse...</span>
+                <div className="bg-white border border-terracotta/10 p-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center gap-2">
+                  <Loader2 className="animate-spin text-terracotta" size={10} />
+                  <span className="text-[9px] text-muted-foreground">Une réponse se prépare...</span>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="p-4 border-t border-terracotta/10 bg-sand/20 space-y-4">
+          <div className="p-3 border-t border-terracotta/10 bg-sand/10 space-y-3">
             {messages.length < 3 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {['Authentification', 'Sur Mesure', 'Logistique'].map(tag => (
                   <button 
                     key={tag}
                     onClick={() => handleQuickAction(tag)}
-                    className="text-[9px] px-3 py-1 bg-white hover:bg-terracotta hover:text-white border border-terracotta/10 rounded-full transition-all text-muted-foreground"
+                    className="text-[8px] px-2 py-0.5 bg-white hover:bg-terracotta hover:text-white border border-terracotta/10 rounded-full transition-all text-muted-foreground"
                   >
                     {tag}
                   </button>
@@ -781,28 +752,28 @@ export const FloatingSupport = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Posez votre question à notre expert..."
-                className="flex-1 bg-white border-none rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-terracotta outline-none shadow-inner"
+                placeholder="Votre message..."
+                className="flex-1 bg-white border-none rounded-lg px-3 py-1.5 text-[10px] focus:ring-1 focus:ring-terracotta outline-none shadow-inner"
               />
               <button 
                 onClick={handleSend}
                 disabled={isLoading}
-                className="h-10 w-10 rounded-xl bg-terracotta text-white flex items-center justify-center hover:bg-terracotta/90 transition-all disabled:opacity-50"
+                className="h-8 w-8 rounded-lg bg-terracotta text-white flex items-center justify-center hover:bg-terracotta/90 transition-all disabled:opacity-50"
               >
-                <Send size={18} />
+                <Send size={14} />
               </button>
             </div>
             
-            <div className="flex items-center justify-center gap-4">
-              <div className="h-[1px] bg-terracotta/10 flex-1" />
-              <p className="text-[8px] uppercase tracking-widest text-muted-foreground opacity-60">ou</p>
-              <div className="h-[1px] bg-terracotta/10 flex-1" />
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-[1px] bg-terracotta/5 flex-1" />
+              <p className="text-[7px] uppercase tracking-widest text-muted-foreground opacity-40">ou</p>
+              <div className="h-[1px] bg-terracotta/5 flex-1" />
             </div>
 
             <a href="https://wa.me/22900000000" target="_blank" rel="noopener noreferrer" className="block">
-              <Button className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl h-10 uppercase font-black text-[9px] tracking-widest active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
-                <MessageCircle size={16} />
-                WhatsApp Direct
+              <Button className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white rounded-lg h-8 uppercase font-black text-[8px] tracking-widest active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
+                <MessageCircle size={14} />
+                WhatsApp
               </Button>
             </a>
           </div>

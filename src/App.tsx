@@ -8,6 +8,7 @@ import { ForgotPasswordPage, ResetPasswordPage } from './components/AuthRecovery
 import ClientDashboard from './components/ClientDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import HistoryPage from './components/HistoryPage';
+import ProductDetailPage from './components/ProductDetailPage';
 import { PrivacyPolicy, TermsConditions } from './components/LegalPages';
 import ContactPage from './components/ContactPage';
 import { CartProvider } from './lib/CartContext';
@@ -34,6 +35,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<ArtisanMarketplace />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsConditions />} />

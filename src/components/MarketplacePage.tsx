@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tous');
+  const [selectedArtisan, setSelectedArtisan] = useState('Tous');
+  const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc'>('default');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const popularSearches = ["Masques Guèlèdè", "Tissus Kanvô", "Abomey", "Bronzes", "Décoration"];
@@ -24,7 +26,12 @@ export default function MarketplacePage() {
                           p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           p.origin.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'Tous' || p.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesArtisan = selectedArtisan === 'Tous' || p.artisanId === selectedArtisan;
+    return matchesSearch && matchesCategory && matchesArtisan;
+  }).sort((a, b) => {
+    if (sortBy === 'price-asc') return a.price - b.price;
+    if (sortBy === 'price-desc') return b.price - a.price;
+    return 0;
   });
 
   return (
@@ -44,60 +51,92 @@ export default function MarketplacePage() {
             La Galerie <span className="text-terracotta">Complète</span>
           </motion.h1>
           
-          <div className="flex flex-col md:flex-row gap-4 items-end justify-between">
-            <div className="w-full md:w-1/2 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-terracotta/40" size={18} />
-              <input 
-                type="text"
-                placeholder="Chercher une pièce, un artisan, une ville..."
-                value={searchQuery}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-12 pl-11 pr-4 bg-sand/50 border-none rounded-xl focus:ring-2 focus:ring-terracotta shadow-inner text-sm"
-              />
-              <AnimatePresence>
-                {showSuggestions && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 glass rounded-2xl border border-terracotta/10 shadow-2xl z-50 overflow-hidden"
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col md:flex-row gap-6 items-end justify-between">
+              <div className="w-full md:w-1/2 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-terracotta/40" size={18} />
+                <input 
+                  type="text"
+                  placeholder="Chercher une pièce, un artisan, une ville..."
+                  value={searchQuery}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-12 pl-11 pr-4 bg-sand/50 border-none rounded-xl focus:ring-2 focus:ring-terracotta shadow-inner text-sm"
+                />
+                <AnimatePresence>
+                  {showSuggestions && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full left-0 right-0 mt-2 glass rounded-2xl border border-terracotta/10 shadow-2xl z-50 overflow-hidden"
+                    >
+                      {searchQuery.length === 0 && (
+                        <div className="px-6 py-3 bg-terracotta/5 border-b border-terracotta/10">
+                          <p className="text-[10px] uppercase font-black tracking-widest text-terracotta opacity-60">Recherches Populaires</p>
+                        </div>
+                      )}
+                      {suggestions.map((s, i) => (
+                        <button 
+                          key={i}
+                          onClick={() => { setSearchQuery(s); setShowSuggestions(false); }}
+                          className="w-full text-left px-6 py-4 text-xs font-bold uppercase tracking-widest hover:bg-terracotta hover:text-white transition-all border-b border-terracotta/5 last:border-none flex justify-between items-center group"
+                        >
+                          {s}
+                          <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-6 h-10 rounded-full text-[10px] uppercase font-black tracking-widest transition-all ${
+                      selectedCategory === cat 
+                      ? 'bg-terracotta text-white shadow-lg' 
+                      : 'bg-white text-muted-foreground hover:bg-terracotta/5 border border-terracotta/10'
+                    }`}
                   >
-                    {searchQuery.length === 0 && (
-                      <div className="px-6 py-3 bg-terracotta/5 border-b border-terracotta/10">
-                        <p className="text-[10px] uppercase font-black tracking-widest text-terracotta opacity-60">Recherches Populaires</p>
-                      </div>
-                    )}
-                    {suggestions.map((s, i) => (
-                      <button 
-                        key={i}
-                        onClick={() => { setSearchQuery(s); setShowSuggestions(false); }}
-                        className="w-full text-left px-6 py-4 text-xs font-bold uppercase tracking-widest hover:bg-terracotta hover:text-white transition-all border-b border-terracotta/5 last:border-none flex justify-between items-center group"
-                      >
-                        {s}
-                        <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
-            
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-6 h-10 rounded-full text-[10px] uppercase font-black tracking-widest transition-all ${
-                    selectedCategory === cat 
-                    ? 'bg-terracotta text-white shadow-lg' 
-                    : 'bg-white text-muted-foreground hover:bg-terracotta/5 border border-terracotta/10'
-                  }`}
+
+            <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-terracotta/5">
+              <div className="flex items-center gap-3">
+                <Filter size={16} className="text-terracotta" />
+                <span className="text-[10px] uppercase font-black tracking-widest opacity-40">Filtres Avancés</span>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <select 
+                  value={selectedArtisan} 
+                  onChange={(e) => setSelectedArtisan(e.target.value)}
+                  className="bg-white border border-terracotta/10 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:ring-1 focus:ring-terracotta"
                 >
-                  {cat}
-                </button>
-              ))}
+                  <option value="Tous">Tous les Artisans</option>
+                  {ARTISANS.map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-white border border-terracotta/10 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:ring-1 focus:ring-terracotta"
+                >
+                  <option value="default">Tri par défaut</option>
+                  <option value="price-asc">Prix: Croissant</option>
+                  <option value="price-desc">Prix: Décroissant</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -115,7 +154,7 @@ export default function MarketplacePage() {
             <Search className="mx-auto text-terracotta/10 mb-6" size={60} />
             <h2 className="text-2xl md:text-3xl font-heading mb-3">Aucune pièce trouvée</h2>
             <p className="text-muted-foreground font-serif italic mb-6">Votre quête n'a pas encore porté ses fruits. Essayez d'autres termes.</p>
-            <Button onClick={() => {setSearchQuery(''); setSelectedCategory('Tous');}} className="bg-terracotta text-white rounded-full px-10 h-12 uppercase font-black text-[10px] tracking-widest active:scale-95 transition-all">Réinitialiser les filtres</Button>
+            <Button onClick={() => {setSearchQuery(''); setSelectedCategory('Tous'); setSelectedArtisan('Tous'); setSortBy('default');}} className="bg-terracotta text-white rounded-full px-10 h-12 uppercase font-black text-[10px] tracking-widest active:scale-95 transition-all">Réinitialiser les filtres</Button>
           </div>
         )}
       </main>
