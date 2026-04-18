@@ -94,7 +94,12 @@ export default function ArtisanMarketplace() {
           <div className="space-y-10">
             <div>
               <h2 className="text-4xl md:text-6xl font-heading mb-6">Maîtres de <br /><span className="text-terracotta italic font-light">la Matière</span></h2>
-              <p className="text-base text-muted-foreground font-serif leading-relaxed italic">Chaque artisan de notre marketplace est sélectionné pour son excellence, respectant les matériaux locaux et l'environnement.</p>
+              <p className="text-base text-muted-foreground font-serif leading-relaxed italic mb-8">Chaque artisan de notre marketplace est sélectionné pour son excellence, respectant les matériaux locaux et l'environnement.</p>
+              <Link to="/artisans">
+                <Button variant="outline" className="rounded-full border-terracotta/20 text-terracotta uppercase font-black text-[10px] tracking-widest hover:bg-terracotta hover:text-white transition-all">
+                  Découvrir tous les artisans
+                </Button>
+              </Link>
             </div>
             <div className="grid gap-6">
               {ARTISANS.map(artisan => (
@@ -147,26 +152,11 @@ export default function ArtisanMarketplace() {
               <Avatar className="h-14 w-14 border-2 border-terracotta p-1"><AvatarImage src="https://i.pravatar.cc/150?u=director" /></Avatar>
               <div><p className="font-bold text-base tracking-tight">Directeur Artistique</p><p className="text-[9px] text-muted-foreground uppercase font-black opacity-60">Accompagnement Personnalisé</p></div>
             </div>
-            <Dialog>
-              <DialogTrigger 
-                nativeButton={true}
-                render={
-                  <button className="bg-black text-white rounded-full px-10 h-14 text-[10px] uppercase font-black tracking-widest group shadow-xl hover:bg-black/90 focus:outline-none flex items-center justify-center transition-all active:scale-95">
-                    Initier un Projet <PenTool className="ml-2 group-hover:rotate-12 transition-transform" />
-                  </button>
-                }
-              />
-              <DialogContent className="glass">
-                <DialogHeader>
-                  <DialogTitle className="font-heading text-3xl">Co-création Signature</DialogTitle>
-                </DialogHeader>
-                <div className="py-8 space-y-4">
-                  <p className="font-serif italic text-lg">Votre demande de conciergerie a été transmise à notre directeur artistique.</p>
-                  <p className="text-sm text-muted-foreground uppercase tracking-widest font-black opacity-60">Nous vous contacterons sous 24h pour discuter de votre pièce exclusive.</p>
-                  <Button className="w-full bg-terracotta rounded-full h-12 uppercase font-black text-xs tracking-widest">Fermer</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Link to="/custom-order">
+              <Button className="bg-black text-white rounded-full px-10 h-14 text-[10px] uppercase font-black tracking-widest group shadow-xl hover:bg-black/90 transition-all active:scale-95">
+                Initier un Projet <PenTool className="ml-2 group-hover:rotate-12 transition-transform" />
+              </Button>
+            </Link>
           </div>
           <div className="grid grid-cols-2 gap-6 scale-110">
             <img src="https://picsum.photos/seed/custom1/600/800" className="rounded-3xl shadow-2xl skew-y-3" alt="Custom" />
@@ -254,14 +244,14 @@ export default function ArtisanMarketplace() {
                 { name: "Céramiques", link: "/marketplace" }
               ] },
               { title: "Services", items: [
-                { name: "Sur Mesure", link: "/#sur-mesure" },
+                { name: "Sur Mesure", link: "/custom-order" },
                 { name: "Logistique", link: "/marketplace" },
                 { name: "Conciergerie", link: "/contact" },
                 { name: "Authentification", link: "/history" }
               ] },
               { title: "Maison", items: [
                 { name: "Notre Histoire", link: "/history" },
-                { name: "Les Artisans", link: "/#artisans" },
+                { name: "Les Artisans", link: "/artisans" },
                 { name: "Engagements", link: "/privacy" },
                 { name: "Contact", link: "/contact" }
               ] }

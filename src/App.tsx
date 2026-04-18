@@ -9,6 +9,8 @@ import ClientDashboard from './components/ClientDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import HistoryPage from './components/HistoryPage';
 import ProductDetailPage from './components/ProductDetailPage';
+import ArtisansPage from './components/ArtisansPage';
+import CustomOrderPage from './components/CustomOrderPage';
 import { PrivacyPolicy, TermsConditions } from './components/LegalPages';
 import ContactPage from './components/ContactPage';
 import { CartProvider } from './lib/CartContext';
@@ -36,6 +38,8 @@ export default function App() {
               <Route path="/" element={<ArtisanMarketplace />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
               <Route path="/product/:id" element={<ProductDetailPage />} />
+              <Route path="/artisans" element={<ArtisansPage />} />
+              <Route path="/custom-order" element={<CustomOrderPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsConditions />} />

@@ -79,10 +79,10 @@ export const Nav = () => {
           <Link to="/marketplace" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
             <Maximize2 size={12} /> La Galerie
           </Link>
-          <Link to="/#artisans" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
+          <Link to="/artisans" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
             <Users size={12} /> Nos Artisans
           </Link>
-          <Link to="/#sur-mesure" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
+          <Link to="/custom-order" className="hover:text-terracotta transition-colors flex items-center gap-1.5">
             <Zap size={12} /> Sur Mesure
           </Link>
           
@@ -187,10 +187,10 @@ export const Nav = () => {
                 <Link to="/marketplace" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Maximize2 size={24} /> La Galerie
                 </Link>
-                <Link to="/#artisans" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
+                <Link to="/artisans" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Users size={24} /> Nos Artisans
                 </Link>
-                <Link to="/#sur-mesure" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
+                <Link to="/custom-order" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">
                   <Zap size={24} /> Sur Mesure
                 </Link>
                 <Link to="/history" onClick={() => setIsMenuOpen(false)} className="text-2xl font-heading flex items-center gap-4 hover:text-terracotta transition-colors border-b border-terracotta/10 pb-4">

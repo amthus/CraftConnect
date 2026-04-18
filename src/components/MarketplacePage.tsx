@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, X, ArrowUpRight } from 'lucide-react';
 import { Nav, ProductCard, CartSidebar, WishlistSidebar, FloatingSupport } from './SharedComponents';
 import { PRODUCTS, CATEGORIES, ARTISANS } from '../lib/constants';
 import { Button } from '@/components/ui/button';
 
 export default function MarketplacePage() {
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tous');
   const [selectedArtisan, setSelectedArtisan] = useState('Tous');
   const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc'>('default');
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    const artisanId = searchParams.get('artisan');
+    if (artisanId) {
+      setSelectedArtisan(artisanId);
+    }
+  }, [searchParams]);
 
   const popularSearches = ["Masques Guèlèdè", "Tissus Kanvô", "Abomey", "Bronzes", "Décoration"];
 
