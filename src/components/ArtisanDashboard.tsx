@@ -9,21 +9,31 @@ import {
   MessageSquare, 
   Star, 
   DollarSign, 
-  Clock, 
   ChevronRight,
   Plus,
-  ArrowUpRight,
   Eye,
   Hammer,
   Edit,
-  Trash2
+  Trash2,
+  Bell,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { PRODUCTS } from '../lib/constants';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  doc, 
+  updateDoc, 
+  addDoc, 
+  deleteDoc,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const salesData = [
   { name: 'Jan', sales: 400 },
@@ -35,67 +45,125 @@ const salesData = [
 ];
 
 export default function ArtisanDashboard() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'sales' | 'inventory' | 'requests'>('sales');
   
-  const artisanProducts = PRODUCTS.filter(p => p.artisanId === '1');
-  const [localProducts, setLocalProducts] = useState(artisanProducts);
+  const [localProducts, setLocalProducts] = useState<any[]>([]);
+  const [localRequests, setLocalRequests] = useState<any[]>([]);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleCreateProduct = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newProduct = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: formData.get('name') as string,
-      category: formData.get('category') as string,
-      price: Number(formData.get('price')),
-      origin: "Bénin",
-      image: "https://picsum.photos/seed/new/400/400",
-      artisanId: '1',
-      soulOfObject: formData.get('description') as string,
-      textureLabel: "Original",
-      stock: 1
+  useEffect(() => {
+    if (!user || user.role !== 'artisan') {
+      const timeout = setTimeout(() => {
+        if (!user || user.role !== 'artisan') navigate('/login');
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+
+    // Fetch artisan's products
+    const qProducts = query(collection(db, 'products'), where('artisanId', '==', user?.id));
+    const unsubProducts = onSnapshot(qProducts, (snapshot) => {
+      setLocalProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    // Fetch requests for this artisan
+    const qRequests = query(collection(db, 'requests'), where('artisanId', '==', user?.id));
+    const unsubRequests = onSnapshot(qRequests, (snapshot) => {
+      setLocalRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    setIsLoading(false);
+
+    return () => {
+      unsubProducts();
+      unsubRequests();
     };
-    setLocalProducts([newProduct, ...localProducts]);
-    toast.success("Pièce publiée avec succès !");
-    setIsAddProductOpen(false);
-  };
+  }, [user]);
 
-  const handleUpdateProduct = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    setLocalProducts(prev => prev.map(p => p.id === editingProduct.id ? {
-      ...p,
-      name: formData.get('name') as string,
-      category: formData.get('category') as string,
-      price: Number(formData.get('price')),
-      soulOfObject: formData.get('description') as string,
-    } : p));
-    toast.success("Mise à jour de l'oeuvre réussie !");
-    setEditingProduct(null);
-  };
-
-  const handleDeleteProduct = (id: string) => {
-    if(confirm("Retirer cette oeuvre de la vente ?")) {
-      setLocalProducts(prev => prev.filter(p => p.id !== id));
-      toast.success("Pièce retirée de la galerie");
+    try {
+      await addDoc(collection(db, 'products'), {
+        name: formData.get('name') as string,
+        category: formData.get('category') as string,
+        price: Number(formData.get('price')),
+        origin: "Bénin",
+        image: "https://picsum.photos/seed/new/400/400",
+        artisanId: user?.id,
+        soulOfObject: formData.get('description') as string,
+        textureLabel: "Original",
+        stock: 5,
+        createdAt: serverTimestamp()
+      });
+      toast.success("Pièce publiée avec succès !");
+      setIsAddProductOpen(false);
+    } catch (error) {
+      toast.error("Erreur lors de la publication");
     }
   };
 
-  const mockRequests = [
-    { id: 'REQ-01', client: 'Alice B.', subject: 'Vase en bronze personnalisé', date: 'il y a 2 jours', status: 'En attente' },
-    { id: 'REQ-02', client: 'Jean K.', subject: 'Statue de jardin sur mesure', date: 'Hier', status: 'En attente' },
+  const handleUpdateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    try {
+      await updateDoc(doc(db, 'products', editingProduct.id), {
+        name: formData.get('name') as string,
+        category: formData.get('category') as string,
+        price: Number(formData.get('price')),
+        soulOfObject: formData.get('description') as string,
+        updatedAt: serverTimestamp()
+      });
+      toast.success("Mise à jour de l'oeuvre réussie !");
+      setEditingProduct(null);
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if(confirm("Retirer cette oeuvre de la vente ?")) {
+      try {
+        await deleteDoc(doc(db, 'products', id));
+        toast.success("Pièce retirée de la galerie");
+      } catch (error) {
+        toast.error("Erreur lors de la suppression");
+      }
+    }
+  };
+
+  const handleUpdateRequestStatus = async (requestId: string, status: string) => {
+    try {
+      await updateDoc(doc(db, 'requests', requestId), { status });
+      toast.success(`Demande ${status === 'accepted' ? 'acceptée' : 'refusée'}`);
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
+  };
+
+  const notifications = [
+    ...localRequests.filter(r => r.status === 'En attente').map(r => ({ 
+      id: r.id, 
+      type: 'request', 
+      title: 'Nouvelle demande sur-mesure', 
+      description: `${r.clientName || 'Client'}: ${r.subject || 'Objet personnalisé'}`, 
+      icon: <Hammer className="text-blue-500" /> 
+    })),
+    ...localProducts.filter(p => p.stock < 3).map(p => ({ 
+      id: p.id, 
+      type: 'stock', 
+      title: 'Stock Faible', 
+      description: `${p.name} (${p.stock} restant)`, 
+      icon: <AlertTriangle className="text-amber-500" /> 
+    }))
   ];
 
   useEffect(() => {
-    if (!token || user?.role !== 'artisan') {
-      // For demo purposes, we might allow viewing if someone forces the route, but in production we redirect.
-      // navigate('/login');
-    }
-  }, [token, user, navigate]);
+    // Role check and sync logic is handled above
+  }, [user, navigate]);
 
   const stats = [
     { label: "Ventes Totales", value: "2,450€", icon: <DollarSign />, color: "bg-emerald-500", trend: "+12%" },
@@ -324,46 +392,86 @@ export default function ArtisanDashboard() {
       </div>
 
       <div className="grid gap-4">
-        {mockRequests.map(req => (
+        {localRequests.map(req => (
           <MCard key={req.id} className="p-6 flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-6 flex-1">
               <div className="h-12 w-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
                 <MessageSquare size={20} />
               </div>
               <div>
-                <p className="font-bold text-base tracking-tight">{req.subject}</p>
+                <p className="font-bold text-base tracking-tight">{req.subject || 'Ouvrage Personnalisé'}</p>
                 <div className="flex items-center gap-3 mt-1">
-                  <p className="text-[9px] uppercase font-mono font-bold text-foreground/20 tracking-widest">{req.client}</p>
+                  <p className="text-[9px] uppercase font-mono font-bold text-foreground/20 tracking-widest">{req.clientName || 'Collectionneur'}</p>
                   <span className="text-[9px] text-foreground/10">•</span>
-                  <p className="text-[9px] uppercase font-mono font-bold text-foreground/20 tracking-widest italic">{req.date}</p>
+                  <p className="text-[9px] uppercase font-mono font-bold text-foreground/20 tracking-widest italic">{req.createdAt?.toDate().toLocaleDateString() || 'Récemment'}</p>
+                  <span className="text-[9px] text-foreground/10">•</span>
+                  <MBadge variant={req.status === 'accepted' ? 'success' : req.status === 'rejected' ? 'error' : 'warning'}>
+                    {req.status || 'En attente'}
+                  </MBadge>
                 </div>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="h-10 px-6 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all" onClick={() => toast.success("Demande acceptée !")}>Accepter</Button>
-              <Button variant="ghost" className="h-10 px-6 rounded-xl text-[10px] uppercase font-black tracking-widest text-red-500 hover:bg-red-50" onClick={() => toast.error("Demande refusée")}>Décliner</Button>
+              {req.status === 'En attente' && (
+                <>
+                  <Button variant="outline" className="h-10 px-6 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all" onClick={() => handleUpdateRequestStatus(req.id, 'accepted')}>Accepter</Button>
+                  <Button variant="ghost" className="h-10 px-6 rounded-xl text-[10px] uppercase font-black tracking-widest text-red-500 hover:bg-red-50" onClick={() => handleUpdateRequestStatus(req.id, 'rejected')}>Décliner</Button>
+                </>
+              )}
               <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-sand/50"><Eye size={18} /></Button>
             </div>
           </MCard>
         ))}
+        {localRequests.length === 0 && (
+          <MCard className="p-12 border-dashed border-2 flex flex-col items-center text-center space-y-8 bg-sand/5 mt-8">
+            <div className="h-16 w-16 bg-blue-500 text-white rounded-2xl flex items-center justify-center shadow-lg">
+              <Hammer size={28} />
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-3xl font-heading italic font-light tracking-tight">Aucune demande <span className="text-terracotta">pour le moment</span></h3>
+              <p className="text-base text-muted-foreground font-serif italic max-w-sm mx-auto leading-relaxed">
+                "Le silence est parfois le prélude à de grandes inspirations. Vos futurs chefs-d'œuvre attendent leur moment."
+              </p>
+            </div>
+          </MCard>
+        )}
       </div>
-
-      <MCard className="p-12 border-dashed border-2 flex flex-col items-center text-center space-y-8 bg-sand/5 mt-8">
-        <div className="h-16 w-16 bg-blue-500 text-white rounded-2xl flex items-center justify-center shadow-lg">
-          <Hammer size={28} />
-        </div>
-        <div className="space-y-3">
-          <h3 className="text-3xl font-heading italic font-light tracking-tight">Le <span className="text-terracotta">Futur</span> des Créations</h3>
-          <p className="text-base text-muted-foreground font-serif italic max-w-sm mx-auto leading-relaxed">
-            "Restez à l'écoute de ces visions précieuses. Chaque demande est une opportunité d'étendre votre art vers de nouveaux horizons."
-          </p>
-        </div>
-      </MCard>
     </div>
   );
 
   return (
     <DashboardLayout title="Atelier de Maître">
+      {notifications.length > 0 && (
+        <div className="mb-10 space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <Bell size={18} className="text-terracotta" />
+            <h3 className="text-[10px] uppercase font-black tracking-widest text-foreground/40">Alertes Prioritaires ({notifications.length})</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {notifications.map((n, i) => (
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, x: -20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                transition={{ delay: i * 0.1 }}
+                className="flex items-center gap-4 p-4 glass rounded-2xl border border-terracotta/10 hover:border-terracotta/20 transition-all bg-white"
+              >
+                <div className="h-10 w-10 rounded-xl bg-sand/30 flex items-center justify-center shrink-0">
+                  {n.icon}
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-[10px] uppercase font-black tracking-widest text-foreground/80 truncate">{n.title}</p>
+                  <p className="text-[10px] font-mono font-bold text-foreground/40 truncate mt-0.5">{n.description}</p>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-terracotta/5" onClick={() => setActiveTab(n.type === 'request' ? 'requests' : 'inventory')}>
+                  <ChevronRight size={14} />
+                </Button>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mb-10 flex gap-8 border-b border-terracotta/5">
         {[
           { id: 'sales', label: 'Ventes & Stats', icon: <TrendingUp size={16}/> },

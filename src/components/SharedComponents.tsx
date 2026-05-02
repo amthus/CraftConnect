@@ -72,7 +72,7 @@ export const Nav = () => {
           : 'bg-white/10 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none py-5 md:py-8'
       }`}>
         <Link to="/" className="text-lg md:text-xl font-heading tracking-tight text-terracotta flex items-center gap-2 cursor-pointer">
-          <span className="font-black">BÉNIN</span>
+          <span className="font-black">THUS</span>
           <span className="font-light text-foreground">ARTISAN</span>
         </Link>
         
@@ -324,18 +324,56 @@ export const WishlistSidebar = () => {
   );
 };
 
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+
 export const CartSidebar = () => {
-  const { bagItems, isBagOpen, setIsBagOpen, removeFromBag, shippingCountry, setShippingCountry, totalBagPrice } = useCart();
+  const { bagItems, isBagOpen, setIsBagOpen, removeFromBag, shippingCountry, setShippingCountry, totalBagPrice, clearBag } = useCart();
+  const { user } = useAuth();
   const [step, setStep] = useState<'items' | 'confirm'>('items');
+  const [isProcessing, setIsProcessing] = useState(false);
+  
   const currentCountry = COUNTRIES.find(c => c.name === shippingCountry) || COUNTRIES[0];
   const shippingCost = currentCountry.shipping;
   const customsDuties = totalBagPrice * currentCountry.duties;
   const finalTotal = totalBagPrice + shippingCost + customsDuties;
 
-  // Reset step when bag closes
-  useEffect(() => {
-    if (!isBagOpen) setStep('items');
-  }, [isBagOpen]);
+  const handlePayment = async () => {
+    if (!user) {
+      toast.error("Veuillez vous connecter pour commander");
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
+      // Create order in Firestore
+      await addDoc(collection(db, 'orders'), {
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        products: bagItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          artisanId: item.artisanId
+        })),
+        total: finalTotal,
+        shippingCountry,
+        status: 'En préparation',
+        createdAt: serverTimestamp(),
+        date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+      });
+
+      toast.success("Commande confirmée ! Merci de votre confiance.");
+      clearBag();
+      setIsBagOpen(false);
+    } catch (error) {
+      console.error("Order error:", error);
+      toast.error("Erreur lors de la validation de la commande");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <Dialog open={isBagOpen} onOpenChange={setIsBagOpen}>
@@ -452,17 +490,16 @@ export const CartSidebar = () => {
 
                 <div className="space-y-3">
                   <Button 
-                    onClick={() => {
-                        toast.success("Commande transmise ! Vous allez être redirigé vers l'espace de paiement sécurisé.");
-                        // In a real app, this would redirect to Stripe/PayPal
-                    }}
+                    onClick={handlePayment}
+                    disabled={isProcessing}
                     className="w-full bg-terracotta hover:bg-terracotta/90 text-white rounded-full h-14 text-xs uppercase tracking-widest font-bold shadow-xl shadow-terracotta/30"
                   >
-                    Confirmer et Payer
+                    {isProcessing ? <Loader2 className="animate-spin" /> : "Confirmer et Payer"}
                   </Button>
                   <Button 
                     variant="ghost" 
                     onClick={() => setStep('items')}
+                    disabled={isProcessing}
                     className="w-full text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-terracotta"
                   >
                     Retour au panier

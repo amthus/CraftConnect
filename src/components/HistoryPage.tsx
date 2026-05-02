@@ -119,7 +119,7 @@ export default function HistoryPage() {
             <h2 className="text-3xl md:text-4xl font-heading">Le Souffle de la Main</h2>
             <div className="space-y-5 text-base text-muted-foreground font-serif leading-relaxed">
               <p>
-                Bénin Artisan Marketplace n'est pas qu'un portail commercial ; c'est un sanctuaire pour la transmission. Des rives de Ouidah jusqu'aux collines boisées du Nord, notre mission est de préserver des métiers menacés par la standarisation du monde moderne.
+                THUS ARTISAN Marketplace n'est pas qu'un portail commercial ; c'est un sanctuaire pour la transmission. Des rives de Ouidah jusqu'aux collines boisées du Nord, notre mission est de préserver des métiers menacés par la standarisation du monde moderne.
               </p>
               <p>
                 Chaque acquisition sur notre plateforme finance directement des programmes d'apprentissage pour la nouvelle génération, assurant que l'étincelle de la création béninoise ne s'éteigne jamais.

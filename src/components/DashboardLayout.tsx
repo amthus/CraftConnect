@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -65,6 +65,30 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
 
   const filteredItems = sidebarItems.filter(item => !item.roles || (user && item.roles.includes(user.role)));
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts if focus is in an input/textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' || 
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+
+      // Alt + Number shortcuts
+      if (e.altKey && e.key >= '1' && e.key <= '9') {
+        const index = parseInt(e.key) - 1;
+        if (filteredItems[index]) {
+          navigate(filteredItems[index].path);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [filteredItems, navigate]);
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -92,35 +116,40 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-          {filteredItems.map(item => {
+          {filteredItems.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (
               <Link 
                 key={item.id} 
                 to={item.path}
-                className={`flex items-center gap-3 px-4 h-12 rounded-xl transition-all duration-200 relative group overflow-hidden ${
+                className={`flex items-center gap-3 px-4 h-12 rounded-xl transition-all duration-300 relative group overflow-hidden ${
                   isActive 
-                    ? 'bg-terracotta text-white shadow-sm' 
+                    ? 'bg-terracotta text-white shadow-lg shadow-terracotta/25' 
                     : 'text-foreground/60 hover:text-terracotta hover:bg-terracotta/[0.03]'
                 }`}
               >
                 {isActive && (
                   <motion.div 
                     layoutId="sidebarActiveBar" 
-                    className="absolute left-0 top-0 bottom-0 w-1 bg-white/20" 
+                    className="absolute left-0 top-2 bottom-2 w-1.5 bg-white rounded-r-full" 
                   />
                 )}
-                <div className={`shrink-0 ${isActive ? 'text-white' : 'text-terracotta/70 group-hover:scale-110 group-hover:text-terracotta transition-transform'}`}>
-                  {React.cloneElement(item.icon as React.ReactElement<any>, { size: 18, strokeWidth: isActive ? 2.5 : 2 })}
+                <div className={`shrink-0 ${isActive ? 'text-white scale-110' : 'text-terracotta/70 group-hover:scale-110 group-hover:text-terracotta transition-transform'}`}>
+                  {React.cloneElement(item.icon as React.ReactElement<any>, { size: 18, strokeWidth: isActive ? 3 : 2 })}
                 </div>
-                <span className={`text-[11px] font-bold uppercase tracking-[0.15em] ${isActive ? 'font-black' : ''}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-[0.15em] flex-1 ${isActive ? 'font-black' : ''}`}>
                   {item.label}
                 </span>
-                {isActive && (
-                  <motion.div initial={{ x: -5, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="ml-auto">
-                    <ChevronRight size={14} className="opacity-50" />
-                  </motion.div>
-                )}
+                <div className="flex items-center gap-2">
+                  <span className={`text-[9px] font-mono opacity-0 group-hover:opacity-40 transition-opacity ${isActive ? 'text-white' : 'text-foreground/40'}`}>
+                    Alt+{index + 1}
+                  </span>
+                  {isActive && (
+                    <motion.div initial={{ x: -5, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="ml-auto">
+                      <ChevronRight size={14} className="opacity-50" />
+                    </motion.div>
+                  )}
+                </div>
               </Link>
             );
           })}

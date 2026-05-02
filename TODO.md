@@ -1,4 +1,4 @@
-# Road-map : Bénin Artisan Marketplace 🇧🇯
+# Road-map : THUS ARTISAN Marketplace 🇧🇯
 
 Voici la liste des tâches restantes pour passer d'un prototype à une application de production complète.
 

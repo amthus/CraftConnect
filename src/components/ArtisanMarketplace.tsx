@@ -10,7 +10,8 @@ import {
   Truck,
   MapPin,
   ChevronRight,
-  ShoppingBag
+  ShoppingBag,
+  X
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,14 +26,50 @@ import {
 import { Nav, ProductCard, CartSidebar, WishlistSidebar, FloatingSupport, LogisticsWidget } from './SharedComponents';
 import { ARTISANS, PRODUCTS } from '../lib/constants';
 
+import { 
+  collection, 
+  onSnapshot 
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+
 export default function ArtisanMarketplace() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
-  const heroScale = useTransform(scrollY, [0, 800], [1, 1.25]);
-  const heroY = useTransform(scrollY, [0, 800], [0, 200]);
+  
+  const [liveProducts, setLiveProducts] = useState<any[]>([]);
+  const [liveArtisans, setLiveArtisans] = useState<any[]>([]);
+
+  useEffect(() => {
+    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+      setLiveProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    const unsubArtisans = onSnapshot(collection(db, 'artisans'), (snapshot) => {
+      setLiveArtisans(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => {
+      unsubProducts();
+      unsubArtisans();
+    };
+  }, []);
+
+  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 500], [1, 1.15]);
+  const heroTextY = useTransform(scrollY, [0, 500], [0, -120]);
+  const heroBgY = useTransform(scrollY, [0, 500], [0, 150]);
+  const heroRotate = useTransform(scrollY, [0, 1000], [0, 5]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const galleryImages = [
+    { url: "https://images.unsplash.com/photo-1590422119330-8488e0787e9c?q=80&w=800", title: "Sculpture Yoruba", type: "Bronze" },
+    { url: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?q=80&w=800", title: "Tissage Kanvô", type: "Textile" },
+    { url: "https://images.unsplash.com/photo-1594122230689-45899d9e6f69?q=80&w=800", title: "Céramique de Sè", type: "Argile" },
+    { url: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=800", title: "Masque Gèlèdé", type: "Bois" },
+    { url: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800", title: "Trône Royal", type: "Sculpture" },
+    { url: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=800", title: "Fonderie Traditionnelle", type: "Métal" }
+  ];
 
   return (
     <div className="min-h-screen relative font-sans selection:bg-terracotta selection:text-white pb-20">
@@ -41,31 +78,55 @@ export default function ArtisanMarketplace() {
       <WishlistSidebar />
       <FloatingSupport />
 
-      <section className="relative min-h-screen py-20 flex items-center justify-center overflow-hidden bg-sand">
-        <motion.div style={{ opacity: heroOpacity, scale: heroScale, y: heroY }} className="absolute inset-0 z-0">
-          <img src="https://picsum.photos/seed/market/1920/1080?blur=1" alt="Back" className="w-full h-full object-cover opacity-40 scale-110" referrerPolicy="no-referrer" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-sand to-sand" />
+      <section className="relative min-h-[110vh] flex items-center justify-center overflow-hidden bg-[#0A0A0A] text-white">
+        <motion.div style={{ opacity: heroOpacity, scale: heroScale, y: heroBgY, rotate: heroRotate }} className="absolute inset-0 z-0">
+          <img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=1920" alt="Back" className="w-full h-full object-cover opacity-60 grayscale-[0.2]" referrerPolicy="no-referrer" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
         </motion.div>
-        <div className="relative z-10 text-center max-w-4xl px-6 md:px-4">
-          <motion.h1 initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-4xl sm:text-5xl md:text-7xl lg:text-[7rem] font-heading leading-tight md:leading-none tracking-tight mb-8 text-shadow-gold">
-            L'Authenticité <br /> <span className="text-terracotta">Expatriée</span>
-          </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-base md:text-xl text-muted-foreground font-serif leading-relaxed italic max-w-2xl mx-auto mb-10">
-            "Redécouvrez le Bénin à travers le regard de ses maîtres artisans. Un voyage tactile et spirituel, livré à votre porte."
-          </motion.p>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/marketplace">
-              <Button size="lg" className="bg-terracotta hover:bg-terracotta/90 text-white rounded-full px-8 h-14 text-[10px] uppercase tracking-[0.2em] font-black group shadow-xl">
-                Explorer la Collection <ArrowRight className="ml-2 group-hover:translate-x-1.5 transition-transform" />
-              </Button>
-            </Link>
-            <Link to="/history">
-              <Button size="lg" variant="outline" className="glass border-terracotta/20 rounded-full px-8 h-14 text-[10px] uppercase tracking-[0.2em] font-black hover:bg-white/20">
-                Découvrir l'histoire
-              </Button>
-            </Link>
+        
+        <div className="relative z-10 text-center max-w-5xl px-6 md:px-4">
+          <motion.div
+            style={{ y: heroTextY }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <Badge className="bg-terracotta text-white mb-6 uppercase tracking-[0.4em] px-4 py-1.5 text-[10px] font-black mix-blend-difference">Excellence Béninoise</Badge>
+            <h1 className="text-5xl sm:text-7xl md:text-9xl font-heading leading-[0.85] tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40">
+              L'ÂME <br /> <span className="text-terracotta">DU GESTE</span>
+            </h1>
+            <p className="text-lg md:text-2xl text-white/60 font-serif leading-relaxed italic max-w-2xl mx-auto mb-12 font-light">
+              "Redécouvrez le Bénin à travers le regard de ses maîtres artisans. Un voyage tactile et spirituel, livré à votre porte."
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Link to="/marketplace">
+                <Button size="lg" className="bg-white text-black hover:bg-terracotta hover:text-white rounded-full px-12 h-16 text-[11px] uppercase tracking-[0.2em] font-black group transition-all duration-500 shadow-2xl">
+                  Explorer la Collection <ArrowRight className="ml-3 group-hover:translate-x-2 transition-transform" />
+                </Button>
+              </Link>
+              <div className="flex -space-x-4">
+                {liveArtisans.map(a => (
+                  <Avatar key={a.id} className="border-2 border-white/20 h-10 w-10">
+                    <AvatarImage src={a.image} />
+                  </Avatar>
+                ))}
+                {liveArtisans.length === 0 && (
+                  <div className="h-10 w-10 rounded-full bg-terracotta flex items-center justify-center text-[10px] font-black border-2 border-white/20">
+                    +0
+                  </div>
+                )}
+              </div>
+            </div>
           </motion.div>
         </div>
+        
+        <motion.div 
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20"
+        >
+          <div className="w-1 h-12 bg-gradient-to-b from-terracotta to-transparent rounded-full" />
+        </motion.div>
       </section>
 
       <section id="marketplace" className="py-20 md:py-32 px-4 md:px-12 bg-white">
@@ -83,7 +144,43 @@ export default function ArtisanMarketplace() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            {PRODUCTS.slice(0, 3).map(product => <ProductCard key={product.id} product={product} />)}
+            {liveProducts.slice(0, 3).map(product => <ProductCard key={product.id} product={product} />)}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-[#0A0A0A] text-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+            <div className="max-w-2xl">
+              <h2 className="text-4xl md:text-7xl font-heading leading-[0.9] mb-6">Fragments de <br /><span className="text-terracotta italic font-light">Patrimoine</span></h2>
+              <p className="text-lg text-white/40 font-serif italic max-w-lg">Une immersion visuelle dans les ateliers. Chaque image raconte un instant de création pure.</p>
+            </div>
+            <div className="flex gap-4">
+              <div className="text-right">
+                <p className="text-[10px] uppercase font-black tracking-widest text-terracotta mb-2">Techniques</p>
+                <p className="text-xl font-heading">100% Manuel</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
+            {galleryImages.map((img, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="relative group cursor-zoom-in rounded-3xl overflow-hidden break-inside-avoid shadow-2xl"
+                onClick={() => setSelectedImage(img.url)}
+              >
+                <img src={img.url} alt={img.title} className="w-full grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-8 flex flex-col justify-end">
+                  <p className="text-[10px] uppercase font-black tracking-[0.3em] text-terracotta mb-2">{img.type}</p>
+                  <h4 className="text-2xl font-heading">{img.title}</h4>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -102,7 +199,7 @@ export default function ArtisanMarketplace() {
               </Link>
             </div>
             <div className="grid gap-6">
-              {ARTISANS.map(artisan => (
+              {liveArtisans.map(artisan => (
                 <Link key={artisan.id} to="/artisans">
                   <div className="flex items-center gap-5 p-5 glass rounded-2xl border border-white/40 hover:border-terracotta/20 transition-all cursor-pointer group">
                     <Avatar className="h-16 w-16 ring-4 ring-white group-hover:ring-terracotta/20 transition-all">
@@ -113,7 +210,7 @@ export default function ArtisanMarketplace() {
                       <h4 className="text-2xl font-heading">{artisan.name}</h4>
                       <p className="text-xs text-muted-foreground uppercase mb-2">{artisan.location}</p>
                       <div className="flex gap-2">
-                        {artisan.techniques.slice(0, 2).map(t => <Badge key={t} variant="outline" className="text-[9px] uppercase">{t}</Badge>)}
+                        {artisan.techniques?.slice(0, 2).map(t => <Badge key={t} variant="outline" className="text-[9px] uppercase">{t}</Badge>)}
                       </div>
                     </div>
                   </div>
@@ -167,19 +264,125 @@ export default function ArtisanMarketplace() {
         </div>
       </section>
 
-      <section id="avis" className="py-24 px-4 md:px-12 bg-sand/40">
-        <div className="max-w-7xl mx-auto text-center">
-          <Badge className="mb-8 opacity-40 uppercase tracking-widest border-black text-[9px]">Le Cercle des Collectionneurs</Badge>
-          <div className="grid md:grid-cols-3 gap-10">
+      <section id="avis" className="py-24 px-4 md:px-12 bg-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(183,110,74,0.05),transparent)] pointer-events-none" />
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <Badge className="mb-6 opacity-40 uppercase tracking-[0.5em] border-black text-[9px] font-black">Voix Initiées</Badge>
+            <h2 className="text-5xl md:text-8xl font-heading leading-[0.8] mb-4">Le Témoignage <br /><span className="text-terracotta italic font-light italic">du Cercle</span></h2>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { name: "Julian M.", role: "Architecte d'Intérieur", text: "La qualité des textiles Kanvô est incomparable. Une touche d'histoire dans mes projets modernes.", stars: 5 },
-              { name: "Elena R.", role: "Galeriste, Zurich", text: "Bénin Artisan Marketplace est devenu ma source numéro un pour l'artisanat ouest-africain authentique.", stars: 5 },
-              { name: "Jean-Pierre D.", role: "Collectionneur Privé", text: "Le système de logistique groupée est révolutionnaire. Un luxe accessible et éthique.", stars: 5 }
+              { 
+                name: "Julian M.", 
+                role: "Architecte d'Intérieur, Berlin", 
+                text: "La qualité des textiles Kanvô est incomparable. Une touche d'histoire dans mes projets modernes qui captive immédiatement le regard.", 
+                avatar: "https://i.pravatar.cc/150?u=julian"
+              },
+              { 
+                name: "Elena R.", 
+                role: "Directrice de Galerie, Zurich", 
+                text: "THUS ARTISAN Marketplace est devenu ma source numéro un pour l'artisanat ouest-africain authentique. Le niveau de détail est exceptionnel.", 
+                avatar: "https://i.pravatar.cc/150?u=elena"
+              },
+              { 
+                name: "Jean-Pierre D.", 
+                role: "Collectionneur, Monaco", 
+                text: "Le système de logistique groupée est révolutionnaire. Pouvoir acquérir des pièces lourdes sans compromis éthique est un luxe précieux.", 
+                avatar: "https://i.pravatar.cc/150?u=jean"
+              }
             ].map((avis, i) => (
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} key={i} className="glass p-10 rounded-[2.5rem] border border-white/60 space-y-5 relative flex flex-col items-center">
-                <div className="flex gap-0.5 text-gold mb-3">{Array.from({length: avis.stars}).map((_, j) => <Star key={j} size={12} fill="currentColor" />)}</div>
-                <p className="text-base font-serif italic leading-relaxed font-light">"{avis.text}"</p>
-                <div><p className="font-bold text-base">{avis.name}</p><p className="text-[9px] uppercase font-black opacity-40">{avis.role}</p></div>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }} 
+                key={i} 
+                className="p-12 rounded-[3.5rem] border border-terracotta/5 bg-sand/10 hover:bg-white transition-all duration-500 hover:shadow-2xl hover:shadow-terracotta/5 flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="flex gap-1 text-terracotta mb-8 group-hover:scale-110 transition-transform origin-left">
+                    {Array.from({length: 5}).map((_, j) => <Star key={j} size={14} fill="currentColor" strokeWidth={0} />)}
+                  </div>
+                  <p className="text-xl font-serif italic leading-[1.6] mb-12 text-foreground/80">"{avis.text}"</p>
+                </div>
+                <div className="flex items-center gap-5">
+                  <Avatar className="h-14 w-14 border-2 border-white shadow-lg">
+                    <AvatarImage src={avis.avatar} />
+                  </Avatar>
+                  <div>
+                    <p className="font-black text-xs uppercase tracking-widest">{avis.name}</p>
+                    <p className="text-[10px] font-mono font-bold opacity-30 mt-1">{avis.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent overflow-hidden">
+          <div className="relative w-full h-full flex items-center justify-center">
+            {selectedImage && (
+              <motion.img 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                src={selectedImage} 
+                className="max-w-full max-h-full object-contain rounded-3xl" 
+                alt="Zoom" 
+              />
+            )}
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-6 right-6 h-12 w-12 rounded-full bg-white/10 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/20 transition-all"
+            >
+              <X size={24} />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <section id="faq" className="py-24 px-4 md:px-12 bg-sand/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="bg-terracotta/10 text-terracotta mb-4 uppercase tracking-widest px-3 py-0.5 text-[9px]">Aide & Informations</Badge>
+            <h2 className="text-4xl md:text-6xl font-heading mb-4">Questions <span className="text-terracotta italic font-light">Fréquentes</span></h2>
+            <p className="text-base text-muted-foreground font-serif italic">Tout ce que vous devez savoir sur l'expérience THUS ARTISAN.</p>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              {
+                q: "Comment garantissez-vous l'authenticité des produits ?",
+                a: "Chaque pièce est accompagnée d'un certificat d'authenticité digital lié à un identifiant unique. Nos experts sur place valident personnellement chaque créateur et chaque technique utilisée pour s'assurer qu'elle respecte l'héritage béninois."
+              },
+              {
+                q: "Quels sont les délais et modes de livraison ?",
+                a: "Nous utilisons un système de logistique groupée pour réduire l'empreinte carbone. Les délais varient entre 10 et 21 jours selon votre localisation. Chaque colis est assuré et suivi en temps réel via notre widget logistique."
+              },
+              {
+                q: "Comment fonctionne le processus de commande sur mesure ?",
+                a: "Après avoir initié votre projet, notre directeur artistique vous recontacte pour affiner vos besoins. Une fois le cahier des charges validé, l'artisan commence la création. Vous recevez des mises à jour photos à chaque étape clé."
+              },
+              {
+                q: "Quels sont les frais de douane pour l'international ?",
+                a: "Les frais dépendent de votre pays de résidence. Notre simulateur dans le panier d'achat estime les droits de douane pour vous offrir une transparence totale avant la validation de votre commande."
+              }
+            ].map((item, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="glass p-8 rounded-3xl border border-white/50 hover:border-terracotta/20 transition-all"
+              >
+                <h4 className="text-lg font-bold mb-3 flex items-center gap-3">
+                  <span className="h-6 w-6 bg-terracotta text-white rounded-full flex items-center justify-center text-[10px] font-black">{i + 1}</span>
+                  {item.q}
+                </h4>
+                <p className="text-sm text-muted-foreground leading-relaxed pl-9">{item.a}</p>
               </motion.div>
             ))}
           </div>
@@ -232,7 +435,7 @@ export default function ArtisanMarketplace() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 text-center md:text-left">
           <div className="space-y-4">
             <div className="text-2xl font-heading tracking-tight text-terracotta">
-              <span className="font-black">BÉNIN</span>
+              <span className="font-black">THUS</span>
               <span className="font-light text-foreground">ARTISAN</span>
             </div>
             <p className="text-xs text-muted-foreground max-w-xs font-serif italic">Promouvoir l'excellence artisanale du Bénin sur la scène internationale, une pièce unique à la fois.</p>
@@ -255,7 +458,7 @@ export default function ArtisanMarketplace() {
                 { name: "Notre Histoire", link: "/history" },
                 { name: "Les Artisans", link: "/artisans" },
                 { name: "Engagements", link: "/privacy" },
-                { name: "Contact", link: "/contact" }
+                { name: "Nous joindre", link: "/contact" }
               ] }
             ].map(col => (
               <div key={col.title} className="space-y-3">
@@ -272,7 +475,7 @@ export default function ArtisanMarketplace() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-16 pt-6 border-t border-terracotta/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] uppercase font-black opacity-40 tracking-widest">
-          <p>© 2024 BÉNIN ARTISAN MARKETPLACE. TOUS DROITS RÉSERVÉS.</p>
+          <p>© 2024 THUS ARTISAN MARKETPLACE. TOUS DROITS RÉSERVÉS.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-terracotta">LinkedIn</a>
             <a href="#" className="hover:text-terracotta">Instagram</a>

@@ -1,10 +1,10 @@
-# Bénin Artisan Marketplace
+# THUS ARTISAN Marketplace
 
 Professional digital gallery dedicated to the promotion and international exportation of Beninese artisan excellence.
 
 ## Project Overview
 
-Bénin Artisan Marketplace is a high-end digital platform that connects master artisans from Bénin with international collectors. The application focuses on three core pillars: authenticity, transparency, and logistical efficiency. Each product listed is more than an object; it is a piece of cultural heritage accompanied by a digital certificate of authenticity.
+THUS ARTISAN Marketplace is a high-end digital platform that connects master artisans from Bénin with international collectors. The application focuses on three core pillars: authenticity, transparency, and logistical efficiency. Each product listed is more than an object; it is a piece of cultural heritage accompanied by a digital certificate of authenticity.
 
 ## Key Features
 

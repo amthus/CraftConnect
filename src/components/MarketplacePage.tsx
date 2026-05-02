@@ -3,16 +3,40 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, X, ArrowUpRight } from 'lucide-react';
 import { Nav, ProductCard, CartSidebar, WishlistSidebar, FloatingSupport } from './SharedComponents';
-import { PRODUCTS, CATEGORIES, ARTISANS } from '../lib/constants';
+import { PRODUCTS, CATEGORIES, ARTISANS, TECHNIQUES } from '../lib/constants';
 import { Button } from '@/components/ui/button';
+
+import { 
+  collection, 
+  onSnapshot 
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function MarketplacePage() {
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tous');
+  const [selectedTechnique, setSelectedTechnique] = useState('Tous');
   const [selectedArtisan, setSelectedArtisan] = useState('Tous');
   const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc'>('default');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  const [liveProducts, setLiveProducts] = useState<any[]>([]);
+  const [liveArtisans, setLiveArtisans] = useState<any[]>([]);
+
+  useEffect(() => {
+    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+      setLiveProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    const unsubArtisans = onSnapshot(collection(db, 'artisans'), (snapshot) => {
+      setLiveArtisans(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => {
+      unsubProducts();
+      unsubArtisans();
+    };
+  }, []);
 
   useEffect(() => {
     const artisanId = searchParams.get('artisan');
@@ -25,17 +49,18 @@ export default function MarketplacePage() {
 
   const suggestions = searchQuery.length > 0 ? [
     ...CATEGORIES.filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()) && c !== 'Tous'),
-    ...PRODUCTS.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).map(p => p.name),
-    ...ARTISANS.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase())).map(a => a.name)
+    ...liveProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).map(p => p.name),
+    ...liveArtisans.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase())).map(a => a.name)
   ].slice(0, 6) : popularSearches;
 
-  const filteredProducts = PRODUCTS.filter(p => {
+  const filteredProducts = liveProducts.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           p.origin.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'Tous' || p.category === selectedCategory;
+    const matchesTechnique = selectedTechnique === 'Tous' || p.technique === selectedTechnique;
     const matchesArtisan = selectedArtisan === 'Tous' || p.artisanId === selectedArtisan;
-    return matchesSearch && matchesCategory && matchesArtisan;
+    return matchesSearch && matchesCategory && matchesTechnique && matchesArtisan;
   }).sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
@@ -130,8 +155,19 @@ export default function MarketplacePage() {
                   className="bg-white border border-terracotta/10 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:ring-1 focus:ring-terracotta"
                 >
                   <option value="Tous">Tous les Artisans</option>
-                  {ARTISANS.map(a => (
+                  {liveArtisans.map(a => (
                     <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+
+                <select 
+                  value={selectedTechnique} 
+                  onChange={(e) => setSelectedTechnique(e.target.value)}
+                  className="bg-white border border-terracotta/10 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:ring-1 focus:ring-terracotta"
+                >
+                  <option value="Tous">Toutes les Techniques</option>
+                  {TECHNIQUES.filter(t => t !== 'Tous').map(t => (
+                    <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
 
@@ -162,7 +198,7 @@ export default function MarketplacePage() {
             <Search className="mx-auto text-terracotta/10 mb-6" size={60} />
             <h2 className="text-2xl md:text-3xl font-heading mb-3">Aucune pièce trouvée</h2>
             <p className="text-muted-foreground font-serif italic mb-6">Votre quête n'a pas encore porté ses fruits. Essayez d'autres termes.</p>
-            <Button onClick={() => {setSearchQuery(''); setSelectedCategory('Tous'); setSelectedArtisan('Tous'); setSortBy('default');}} className="bg-terracotta text-white rounded-full px-10 h-12 uppercase font-black text-[10px] tracking-widest active:scale-95 transition-all">Réinitialiser les filtres</Button>
+            <Button onClick={() => {setSearchQuery(''); setSelectedCategory('Tous'); setSelectedTechnique('Tous'); setSelectedArtisan('Tous'); setSortBy('default');}} className="bg-terracotta text-white rounded-full px-10 h-12 uppercase font-black text-[10px] tracking-widest active:scale-95 transition-all">Réinitialiser les filtres</Button>
           </div>
         )}
       </main>

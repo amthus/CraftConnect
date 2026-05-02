@@ -1,46 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useAuth } from '../lib/AuthContext';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { Nav } from './SharedComponents';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { LogIn, UserPlus, ShieldCheck } from 'lucide-react';
+import { LogIn, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        login(data.token, data.user);
-        toast.success(`Bienvenue, ${data.user.name}`);
-        
-        // Dynamic redirection based on role
-        if (data.user.role === 'admin') {
-          navigate('/admin');
-        } else if (data.user.role === 'artisan') {
-          navigate('/artisan');
-        } else {
-          navigate('/dashboard');
-        }
-      } else {
-        toast.error(data.error || 'Erreur de connexion');
-      }
-    } catch (error) {
-      toast.error('Erreur réseau');
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success('Connexion réussie');
+      navigate('/');
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || 'Erreur de connexion');
     } finally {
       setIsSubmitting(false);
     }

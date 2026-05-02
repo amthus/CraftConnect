@@ -9,13 +9,12 @@ import {
   Package, 
   ShoppingBag, 
   Plus, 
-  ArrowUpRight, 
   Search, 
   Filter, 
-  MoreVertical, 
   Edit, 
   Trash2, 
   Eye,
+  Bell,
   CheckCircle2,
   Clock,
   AlertTriangle
@@ -24,18 +23,28 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
   ResponsiveContainer, 
   AreaChart, 
   Area,
   BarChart,
-  Bar
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip
 } from 'recharts';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { 
+  collection, 
+  doc, 
+  updateDoc, 
+  deleteDoc, 
+  onSnapshot,
+  setDoc,
+  addDoc,
+  serverTimestamp
+} from 'firebase/firestore';
+import { db, storage } from '../lib/firebase';
 import { PRODUCTS, ARTISANS } from '../lib/constants';
 
 const chartData = [
@@ -49,24 +58,15 @@ const chartData = [
 ];
 
 export default function AdminDashboard() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'artisans' | 'orders' | 'users'>('overview');
   
-  // Real state for stock management (simulated for now)
-  const [localProducts, setLocalProducts] = useState(PRODUCTS);
-  const [localArtisans, setLocalArtisans] = useState(ARTISANS);
-  const [localOrders, setLocalOrders] = useState([
-    { id: "#00321", date: "12 Avril 14:30", client: "Sophie Lefebvre", status: "Expédié", total: 290, statusType: "warning" as const },
-    { id: "#00320", date: "12 Avril 10:15", client: "Marc Dupont", status: "Livré", total: 450, statusType: "success" as const },
-    { id: "#00319", date: "11 Avril 18:45", client: "Elena Rossi", status: "Payé", total: 180, statusType: "default" as const },
-    { id: "#00318", date: "11 Avril 11:20", client: "Jean Valjean", status: "Annulé", total: 1200, statusType: "error" as const },
-  ]);
-  const [localUsers, setLocalUsers] = useState([
-    { id: "USR-001", name: "Aurelien Zankou", email: "aurelien.zankou@example.com", role: "client", status: "Actif" },
-    { id: "ADM-001", name: "Admin Bénin", email: "admin@beninartisan.com", role: "admin", status: "Actif" },
-    { id: "ART-001", name: "Koffi l'Ancien", email: "koffi@artisan.com", role: "artisan", status: "Inactif" }
-  ]);
+  const [localProducts, setLocalProducts] = useState<any[]>([]);
+  const [localArtisans, setLocalArtisans] = useState<any[]>([]);
+  const [localOrders, setLocalOrders] = useState<any[]>([]);
+  const [localUsers, setLocalUsers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddArtisanOpen, setIsAddArtisanOpen] = useState(false);
@@ -76,136 +76,233 @@ export default function AdminDashboard() {
   const [editingArtisan, setEditingArtisan] = useState<any>(null);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [viewingOrder, setViewingOrder] = useState<any>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
-  const handleDeleteProduct = (id: string) => {
-    if(confirm("Supprimer ce produit ?")) {
-      setLocalProducts(prev => prev.filter(p => p.id !== id));
-      toast.success("Produit supprimé avec succès");
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
+
+    // Real-time synchronization with Firestore
+    const unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
+      setLocalUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+      setLocalProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubArtisans = onSnapshot(collection(db, 'artisans'), (snapshot) => {
+      setLocalArtisans(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubRequests = onSnapshot(collection(db, 'requests'), (snapshot) => {
+      setLocalOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    setIsLoading(false);
+
+    return () => {
+      unsubUsers();
+      unsubProducts();
+      unsubArtisans();
+      unsubRequests();
+    };
+  }, [user]);
+
+  const handleDeleteOrder = async (id: string) => {
+    if(confirm("Supprimer cet historique ?")) {
+      try {
+        await deleteDoc(doc(db, 'requests', id));
+        toast.success("Commande supprimée de la vue");
+      } catch (error) {
+        toast.error("Erreur de suppression");
+      }
     }
   };
 
-  const handleDeleteArtisan = (id: string) => {
-    if(confirm("Supprimer cet artisan ?")) {
-      setLocalArtisans(prev => prev.filter(a => a.id !== id));
-      toast.success("Artisan retiré du réseau");
-    }
-  };
-
-  const handleDeleteUser = (id: string) => {
+  const handleDeleteUser = async (id: string) => {
     if(confirm("Révoquer l'accès de cet utilisateur ?")) {
-      setLocalUsers(prev => prev.filter(u => u.id !== id));
-      toast.success("Utilisateur supprimé");
+      try {
+        await deleteDoc(doc(db, 'users', id));
+        toast.success("Utilisateur supprimé");
+      } catch (error) {
+        toast.error("Échec de la suppression");
+      }
     }
   };
 
-  const handleDeleteOrder = (id: string) => {
-    if(confirm("Supprimer cette commande des registres ?")) {
-      setLocalOrders(prev => prev.filter(o => o.id !== id));
-      toast.success("Commande archivée");
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      await updateDoc(doc(db, 'users', userId), { role: newRole });
+      toast.success("Rôle mis à jour");
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
     }
   };
 
-  const handleCreateProduct = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const newProduct = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: formData.get('name') as string,
-      category: formData.get('category') as string,
-      price: Number(formData.get('price')),
-      stock: Number(formData.get('stock')),
-      origin: "Bénin",
-      image: "https://picsum.photos/seed/new/400/400",
-      artisanId: "art-1",
-      soulOfObject: formData.get('description') as string,
-      textureLabel: "Standard"
-    };
-    setLocalProducts([newProduct, ...localProducts]);
-    toast.success("Pièce ajoutée au catalogue");
-    setIsAddProductOpen(false);
+    try {
+      await addDoc(collection(db, 'products'), {
+        name: formData.get('name') as string,
+        category: formData.get('category') as string,
+        price: Number(formData.get('price')),
+        stock: Number(formData.get('stock')),
+        origin: "Bénin",
+        image: "https://picsum.photos/seed/new/400/400",
+        artisanId: "art-1",
+        soulOfObject: formData.get('description') as string,
+        textureLabel: "Standard",
+        createdAt: serverTimestamp()
+      });
+      toast.success("Pièce ajoutée au catalogue");
+      setIsAddProductOpen(false);
+    } catch (error) {
+      toast.error("Erreur lors de la création");
+    }
   };
 
-  const handleUpdateProduct = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    setLocalProducts(prev => prev.map(p => p.id === editingProduct.id ? {
-      ...p,
-      name: formData.get('name') as string,
-      category: formData.get('category') as string,
-      price: Number(formData.get('price')),
-      stock: Number(formData.get('stock')),
-      soulOfObject: formData.get('description') as string,
-    } : p));
-    toast.success("Fiche produit mise à jour");
-    setEditingProduct(null);
+    try {
+      await updateDoc(doc(db, 'products', editingProduct.id), {
+        name: formData.get('name') as string,
+        category: formData.get('category') as string,
+        price: Number(formData.get('price')),
+        stock: Number(formData.get('stock')),
+        soulOfObject: formData.get('description') as string,
+        updatedAt: serverTimestamp()
+      });
+      toast.success("Fiche produit mise à jour");
+      setEditingProduct(null);
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
   };
 
-  const handleCreateArtisan = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateArtisan = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const newArtisan = {
-      id: `art-${localArtisans.length + 1}`,
-      name: formData.get('name') as string,
-      specialty: formData.get('specialty') as string,
-      bio: formData.get('bio') as string,
-      journey: "Nouveau membre du réseau",
-      location: "Bénin",
-      techniques: [],
-      image: "https://i.pravatar.cc/150?u=new",
-      works: []
-    };
-    setLocalArtisans([newArtisan, ...localArtisans]);
-    toast.success("Artisan recruté");
-    setIsAddArtisanOpen(false);
+    const imageFile = formData.get('image') as File;
+    let imageUrl = "https://i.pravatar.cc/150?u=fallback";
+
+    if (imageFile && imageFile.size > 0) {
+      const uploadedUrl = await handleUploadImage(imageFile);
+      if (uploadedUrl) imageUrl = uploadedUrl;
+    }
+
+    try {
+      await addDoc(collection(db, 'artisans'), {
+        name: formData.get('name') as string,
+        specialty: formData.get('specialty') as string,
+        bio: formData.get('bio') as string,
+        journey: "Nouveau membre du réseau",
+        location: "Bénin",
+        techniques: [],
+        image: imageUrl,
+        works: [],
+        createdAt: serverTimestamp()
+      });
+      toast.success("Artisan recruté avec succès");
+      setIsAddArtisanOpen(false);
+    } catch (error) {
+      toast.error("Erreur lors de la création");
+    }
   };
 
-  const handleUpdateArtisan = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateArtisan = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    setLocalArtisans(prev => prev.map(a => a.id === editingArtisan.id ? {
-      ...a,
-      name: formData.get('name') as string,
-      specialty: formData.get('specialty') as string,
-      bio: formData.get('bio') as string,
-    } : a));
-    toast.success("Profil artisan mis à jour");
-    setEditingArtisan(null);
+    const imageFile = formData.get('image') as File;
+    let imageUrl = editingArtisan.image;
+
+    if (imageFile && imageFile.size > 0) {
+      const uploadedUrl = await handleUploadImage(imageFile);
+      if (uploadedUrl) imageUrl = uploadedUrl;
+    }
+
+    try {
+      await updateDoc(doc(db, 'artisans', editingArtisan.id), {
+        name: formData.get('name') as string,
+        specialty: formData.get('specialty') as string,
+        bio: formData.get('bio') as string,
+        image: imageUrl,
+        updatedAt: serverTimestamp()
+      });
+      toast.success("Profil artisan mis à jour");
+      setEditingArtisan(null);
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
   };
 
   const handleCreateUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newUser = {
-      id: `USR-${Math.floor(Math.random() * 999)}`,
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      role: formData.get('role') as any,
-      status: "Actif"
-    };
-    setLocalUsers([newUser, ...localUsers]);
-    toast.success("Accès créé");
-    setIsAddUserOpen(false);
+    toast.error("La création d'utilisateur manuel est désactivée. Utilisez l'invitation.");
   };
 
-  const handleUpdateUser = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    setLocalUsers(prev => prev.map(u => u.id === editingUser.id ? {
-      ...u,
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      role: formData.get('role') as any,
-      status: formData.get('status') as string,
-    } : u));
-    toast.success("Permissions utilisateur modifiées");
-    setEditingUser(null);
+    try {
+      await updateDoc(doc(db, 'users', editingUser.id), {
+        name: formData.get('name') as string,
+        role: formData.get('role') as any,
+        status: formData.get('status') as string,
+        updatedAt: serverTimestamp()
+      });
+      toast.success("Permissions utilisateur modifiées");
+      setEditingUser(null);
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if(confirm("Supprimer ce produit ?")) {
+      try {
+        await deleteDoc(doc(db, 'products', id));
+        toast.success("Produit supprimé avec succès");
+      } catch (error) {
+        toast.error("Échec de la suppression");
+      }
+    }
+  };
+
+  const handleDeleteArtisan = async (id: string) => {
+    if(confirm("Supprimer cet artisan ?")) {
+      try {
+        await deleteDoc(doc(db, 'artisans', id));
+        toast.success("Artisan retiré du réseau");
+      } catch (error) {
+        toast.error("Échec de la suppression");
+      }
+    }
+  };
+
+  const handleUploadImage = async (file: File) => {
+    if (!file) return null;
+    setUploadingImage(true);
+    try {
+      const storageRef = ref(storage, `artisans/${Date.now()}_${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(snapshot.ref);
+      setUploadingImage(false);
+      return url;
+    } catch (error) {
+      console.error("Storage Error:", error);
+      toast.error("Échec du téléchargement de l'image");
+      setUploadingImage(false);
+      return null;
+    }
   };
 
   useEffect(() => {
-    if (!token || user?.role !== 'admin') {
+    if (!user || user.role !== 'admin') {
       navigate('/login');
     }
-  }, [token, user, navigate]);
+  }, [user, navigate]);
 
   const stats = [
     { label: "CA Mensuel", value: "24,800€", trend: "+12.5%", icon: <TrendingUp />, color: "bg-emerald-500" },
@@ -583,9 +680,15 @@ export default function AdminDashboard() {
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Bio Express</label>
                   <textarea name="bio" rows={3} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
                 </div>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Photo de Profil</label>
+                  <input name="image" type="file" accept="image/*" className="w-full h-12 px-6 py-3 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none" />
+                </div>
                 <div className="pt-4 flex gap-4">
-                  <Button variant="ghost" onClick={() => setIsAddArtisanOpen(false)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
-                  <Button type="submit" className="flex-1 h-12 bg-terracotta text-white rounded-xl uppercase font-black text-[10px] tracking-widest shadow-lg shadow-terracotta/20">Valider Recrutement</Button>
+                  <Button variant="ghost" onClick={() => setIsAddArtisanOpen(false)} disabled={uploadingImage} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
+                  <Button type="submit" disabled={uploadingImage} className="flex-1 h-12 bg-terracotta text-white rounded-xl uppercase font-black text-[10px] tracking-widest shadow-lg shadow-terracotta/20">
+                    {uploadingImage ? 'Téléchargement...' : 'Valider Recrutement'}
+                  </Button>
                 </div>
               </form>
             </motion.div>
@@ -613,9 +716,18 @@ export default function AdminDashboard() {
                   <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Bio Express</label>
                   <textarea name="bio" rows={3} defaultValue={editingArtisan.bio || "Bio non renseignée"} className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-xl outline-none resize-none" required />
                 </div>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Mettre à jour la Photo</label>
+                  <div className="flex items-center gap-6 p-4 border border-terracotta/10 rounded-xl bg-sand/5">
+                    <img src={editingArtisan.image} alt="Profil" className="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-sm" />
+                    <input name="image" type="file" accept="image/*" className="flex-1 text-[10px] font-mono font-bold uppercase tracking-widest text-foreground/40" />
+                  </div>
+                </div>
                 <div className="pt-4 flex gap-4">
-                  <Button variant="ghost" onClick={() => setEditingArtisan(null)} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
-                  <Button type="submit" className="flex-1 h-12 bg-terracotta text-white rounded-xl uppercase font-black text-[10px] tracking-widest shadow-lg shadow-terracotta/20">Mettre à jour</Button>
+                  <Button variant="ghost" onClick={() => setEditingArtisan(null)} disabled={uploadingImage} className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest">Annuler</Button>
+                  <Button type="submit" disabled={uploadingImage} className="flex-1 h-12 bg-terracotta text-white rounded-xl uppercase font-black text-[10px] tracking-widest shadow-lg shadow-terracotta/20">
+                    {uploadingImage ? 'Téléchargement...' : 'Mettre à jour'}
+                  </Button>
                 </div>
               </form>
             </motion.div>

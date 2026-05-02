@@ -5,7 +5,10 @@ import { useAuth } from '../lib/AuthContext';
 import { Nav } from './SharedComponents';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { UserPlus, ShieldCheck } from 'lucide-react';
+import { UserPlus, ShieldCheck, Loader2 } from 'lucide-react';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -14,34 +17,38 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'client' | 'artisan'>('client');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, password, role }),
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Update Firebase Auth profile
+      await updateProfile(user, { displayName: name });
+
+      // Create Firestore profile
+      await setDoc(doc(db, 'users', user.uid), {
+        name,
+        email,
+        phone,
+        role,
+        createdAt: new Date().toISOString()
       });
-      const data = await res.json();
-      if (res.ok) {
-        login(data.token, data.user);
-        toast.success(`Bienvenue au Bénin, ${data.user.name}`);
-        
-        // Conditional navigation based on role
-        if (data.user.role === 'artisan') {
-          navigate('/artisan');
-        } else {
-          navigate('/dashboard');
-        }
+
+      toast.success(`Bienvenue au Bénin, ${name}`);
+      
+      // Navigation is handled by AuthProvider's context update but we can force it here
+      if (role === 'artisan') {
+        navigate('/artisan');
       } else {
-        toast.error(data.error || "Erreur lors de l'inscription");
+        navigate('/dashboard');
       }
-    } catch (error) {
-      toast.error('Erreur réseau');
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error(error.message || "Erreur lors de l'inscription");
     } finally {
       setIsSubmitting(false);
     }

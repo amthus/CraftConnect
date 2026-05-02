@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "artisan": {
+      "title": "Artisan",
+      "description": "Un maître artisan du Bénin",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "specialty": { "type": "string" },
+        "bio": { "type": "string" },
+        "image": { "type": "string", "format": "uri" },
+        "origin": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "specialty", "bio"]
+    },
+    "product": {
+      "title": "Produit",
+      "description": "Une oeuvre artisanale",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "technique": { "type": "string" },
+        "price": { "type": "number" },
+        "origin": { "type": "string" },
+        "image": { "type": "string", "format": "uri" },
+        "artisanId": { "type": "string" },
+        "soulOfObject": { "type": "string" },
+        "textureLabel": { "type": "string" },
+        "stock": { "type": "integer" }
+      },
+      "required": ["name", "category", "price", "artisanId"]
+    },
+    "request": {
+      "title": "Demande Sur-Mesure",
+      "description": "Une commande personnalisée pour un artisan",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "artisanId": { "type": "string" },
+        "subject": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["En attente", "Acceptée", "Refusée", "Terminée"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientId", "artisanId", "subject", "status"]
+    },
+    "testimonial": {
+      "title": "Témoignage",
+      "description": "Avis client",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "text": { "type": "string" },
+        "avatar": { "type": "string", "format": "uri" },
+        "rating": { "type": "integer" }
+      },
+      "required": ["name", "text"]
+    }
+  },
+  "firestore": {
+    "/artisans/{artisanId}": {
+      "schema": "artisan",
+      "description": "Liste des maîtres artisans"
+    },
+    "/products/{productId}": {
+      "schema": "product",
+      "description": "Catalogue des oeuvres"
+    },
+    "/requests/{requestId}": {
+      "schema": "request",
+      "description": "Commandes personnalisées"
+    },
+    "/testimonials/{testimonialId}": {
+      "schema": "testimonial",
+      "description": "Avis des collectionneurs"
+    }
+  }
+}

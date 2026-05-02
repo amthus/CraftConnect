@@ -50,7 +50,7 @@ export const TermsConditions = () => {
         <div className="max-w-4xl mx-auto space-y-4">
           <FileText className="text-terracotta" size={32} />
           <h1 className="text-4xl font-heading">Conditions Générales</h1>
-          <p className="text-sm text-muted-foreground font-serif italic">Conditions d'utilisation de la plateforme Bénin Artisan</p>
+          <p className="text-sm text-muted-foreground font-serif italic">Conditions d'utilisation de la plateforme THUS ARTISAN</p>
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 md:px-12 py-16 prose prose-terracotta prose-sm">
@@ -58,7 +58,7 @@ export const TermsConditions = () => {
           <div className="space-y-6">
             <h2 className="text-3xl font-heading">1. Accord</h2>
             <p className="font-serif leading-relaxed text-muted-foreground">
-              En accédant à Bénin Artisan, vous acceptez d'être lié par ces conditions générales d'utilisation. Chaque pièce vendue est garantie authentique et issue d'artisanat local béninois.
+              En accédant à THUS ARTISAN, vous acceptez d'être lié par ces conditions générales d'utilisation. Chaque pièce vendue est garantie authentique et issue d'artisanat local béninois.
             </p>
           </div>
           <div className="space-y-6">

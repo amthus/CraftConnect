@@ -17,6 +17,7 @@ interface CartContextType {
   shippingCountry: string;
   setShippingCountry: (country: string) => void;
   totalBagPrice: number;
+  clearBag: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -48,6 +49,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const removeFromBag = (id: string) => {
     setBagItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const clearBag = () => {
+    setBagItems([]);
   };
 
   const addToWishlist = (product: Product) => {
@@ -82,7 +87,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setIsWishlistOpen,
       shippingCountry,
       setShippingCountry,
-      totalBagPrice
+      totalBagPrice,
+      clearBag
     }}>
       {children}
     </CartContext.Provider>

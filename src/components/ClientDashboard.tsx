@@ -31,21 +31,62 @@ interface Order {
   date: string;
 }
 
+import { 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  doc, 
+  updateDoc,
+  deleteDoc
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+
 export default function ClientDashboard() {
-  const { user, token } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<any[]>([]);
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'acquisitions' | 'wishlist' | 'preferences' | 'support'>('acquisitions');
-  const [wishlistProducts, setWishlistProducts] = useState(PRODUCTS.slice(0, 2));
+  const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data for demo
-    const mockOrders = [
-      { id: 'ORD-2024-001', userId: '1', products: ['1', '3'], status: 'Livré', total: 1650, date: '12 Avril 2024' },
-      { id: 'ORD-2024-002', userId: '1', products: ['4'], status: 'En préparation', total: 2400, date: '15 Avril 2024' }
-    ];
-    setOrders(mockOrders);
-  }, []);
+    if (!user) return;
+
+    // Fetch user's orders
+    const qOrders = query(collection(db, 'orders'), where('userId', '==', user?.id));
+    const unsubOrders = onSnapshot(qOrders, (snapshot) => {
+      setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    // Fetch user's wishlist (stored in 'users/uid/wishlist')
+    const qWishlist = collection(db, `users/${user?.id}/wishlist`);
+    const unsubWishlist = onSnapshot(qWishlist, (snapshot) => {
+      setWishlistProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    setIsLoading(false);
+
+    return () => {
+      unsubOrders();
+      unsubWishlist();
+    };
+  }, [user]);
+
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    try {
+      await updateDoc(doc(db, 'users', user!.id), {
+        name: formData.get('name') as string,
+        address: formData.get('address') as string,
+        updatedAt: new Date()
+      });
+      toast.success("Profil mis à jour !");
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
+  };
 
   const toggleOrder = (orderId: string) => {
     setExpandedOrders(prev => 
@@ -174,7 +215,15 @@ export default function ClientDashboard() {
                    variant="ghost" 
                    size="icon" 
                    className="absolute top-4 right-4 h-9 w-9 rounded-full bg-white/80 backdrop-blur-md text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
-                   onClick={() => setWishlistProducts(prev => prev.filter(p => p.id !== product.id))}
+                   onClick={async () => {
+                     if (!user) return;
+                     try {
+                       await deleteDoc(doc(db, `users/${user.id}/wishlist`, product.id));
+                       toast.success("Retiré des favoris");
+                     } catch (error) {
+                       toast.error("Échec de la suppression");
+                     }
+                   }}
                  >
                     <Heart size={16} fill="currentColor" />
                  </Button>
@@ -214,12 +263,12 @@ export default function ClientDashboard() {
         <p className="text-xs font-mono font-bold uppercase tracking-widest text-foreground/20">Identité et Logistique de collectionneur</p>
       </div>
 
-      <form className="glass p-12 rounded-[3.5rem] border border-terracotta/5 space-y-10" onSubmit={(e) => { e.preventDefault(); toast.success("Profil mis à jour !"); }}>
+      <form className="glass p-12 rounded-[3.5rem] border border-terracotta/5 space-y-10" onSubmit={handleUpdateProfile}>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Nom Complet</label>
-              <input type="text" defaultValue={user?.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-2xl outline-none focus:ring-1 focus:ring-terracotta" required />
+              <input name="name" type="text" defaultValue={user?.name} className="w-full h-12 px-6 bg-sand/[0.05] border border-terracotta/10 rounded-2xl outline-none focus:ring-1 focus:ring-terracotta" required />
             </div>
             <div className="space-y-2">
                <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Email Principal</label>
@@ -228,7 +277,7 @@ export default function ClientDashboard() {
           </div>
           <div className="space-y-2">
              <label className="text-[9px] uppercase font-mono font-bold tracking-widest text-foreground/40 ml-4">Adresse de Livraison Par Défaut</label>
-             <textarea className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-2xl outline-none resize-none focus:ring-1 focus:ring-terracotta" rows={3} placeholder="Saisir votre adresse complète..." required />
+             <textarea name="address" className="w-full p-6 bg-sand/[0.05] border border-terracotta/10 rounded-2xl outline-none resize-none focus:ring-1 focus:ring-terracotta" rows={3} placeholder="Saisir votre adresse complète..." required />
           </div>
         </div>
         <Button type="submit" className="w-full h-14 bg-terracotta text-white rounded-full uppercase font-black text-[10px] tracking-widest shadow-xl shadow-terracotta/20 hover:scale-[1.02] transition-all">Sauvegarder les modifications</Button>

@@ -46,6 +46,7 @@ export interface Product {
   soulOfObject: string;
   textureLabel: string;
   stock: number;
+  technique?: string;
 }
 
 export const ARTISANS: Artisan[] = [
@@ -107,7 +108,8 @@ export const PRODUCTS: Product[] = [
     category: 'Céramique',
     soulOfObject: "Modelée avec la terre rouge du Mono, cette pièce porte les empreintes de générations de potières.",
     textureLabel: "Grain de terre cuite",
-    stock: 5
+    stock: 5,
+    technique: 'Modelage'
   },
   {
     id: '2',
@@ -119,7 +121,8 @@ export const PRODUCTS: Product[] = [
     category: 'Textile',
     soulOfObject: "Un tissage complexe aux motifs symbolisant la force et la sagesse des rois du Danhomè.",
     textureLabel: "Fibres de coton naturel",
-    stock: 0
+    stock: 0,
+    technique: 'Tissage'
   },
   {
     id: '3',
@@ -131,7 +134,8 @@ export const PRODUCTS: Product[] = [
     category: 'Sculpture',
     soulOfObject: "La cire perdue capturant l'esprit des ancêtres sur la côte des esclaves.",
     textureLabel: "Patine de bronze",
-    stock: 2
+    stock: 2,
+    technique: 'Fonderie'
   },
   {
     id: '4',
@@ -143,7 +147,8 @@ export const PRODUCTS: Product[] = [
     category: 'Mobilier',
     soulOfObject: "Taillée dans une pièce unique dIroko centenaire, représentant les liens familiaux.",
     textureLabel: "Bois massif nervuré",
-    stock: 1
+    stock: 1,
+    technique: 'Sculpture'
   },
   {
     id: '5',
@@ -155,7 +160,8 @@ export const PRODUCTS: Product[] = [
     category: 'Joaillerie',
     soulOfObject: "Enfilage de perles de verre anciennes et pierres semi-précieuses du Nord Bénin.",
     textureLabel: "Éclats de verre poli",
-    stock: 0
+    stock: 0,
+    technique: 'Enfilage'
   },
   {
     id: '6',
@@ -167,11 +173,13 @@ export const PRODUCTS: Product[] = [
     category: 'Sculpture',
     soulOfObject: "Masque cérémoniel honorant les mères ancestrales, sculpté dans le bois de fromager.",
     textureLabel: "Peinture naturelle mate",
-    stock: 3
+    stock: 3,
+    technique: 'Sculpture'
   }
 ];
 
 export const CATEGORIES = ['Tous', 'Céramique', 'Textile', 'Sculpture', 'Mobilier', 'Joaillerie'];
+export const TECHNIQUES = ['Tous', 'Tissage', 'Sculpture', 'Céramique', 'Modelage', 'Fonderie', 'Enfilage'];
 
 export const COUNTRIES = [
   { name: 'France', shipping: 25, duties: 0.2 },

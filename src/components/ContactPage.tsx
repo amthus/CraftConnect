@@ -77,7 +77,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-[10px] uppercase font-black tracking-widest opacity-40 mb-1">Email</p>
-                  <p className="font-bold text-lg">concierge@beninartisan.com</p>
+                  <p className="font-bold text-lg">concierge@thusartisan.com</p>
                 </div>
               </div>
             </div>

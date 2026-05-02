@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
 
 interface User {
   id: string;
@@ -10,45 +13,69 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
-  logout: () => void;
   isLoading: boolean;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('benin_artisan_token');
-    const savedUser = localStorage.getItem('benin_artisan_user');
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-    }
-    setIsLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setIsLoading(true);
+      if (firebaseUser) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (userDoc.exists()) {
+            setUser({
+              id: firebaseUser.uid,
+              ...userDoc.data()
+            } as User);
+          } else {
+            // Default profile for new users if not found (though registration should handle this)
+            const newUser: User = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || 'Utilisateur',
+              email: firebaseUser.email || '',
+              role: 'client',
+              avatar: firebaseUser.photoURL || undefined
+            };
+            await setDoc(doc(db, 'users', firebaseUser.uid), {
+              name: newUser.name,
+              email: newUser.email,
+              role: newUser.role,
+              avatar: newUser.avatar,
+              createdAt: new Date().toISOString()
+            });
+            setUser(newUser);
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = (token: string, user: User) => {
-    setToken(token);
-    setUser(user);
-    localStorage.setItem('benin_artisan_token', token);
-    localStorage.setItem('benin_artisan_user', JSON.stringify(user));
-  };
-
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('benin_artisan_token');
-    localStorage.removeItem('benin_artisan_user');
+  const logout = async () => {
+    try {
+      await auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );

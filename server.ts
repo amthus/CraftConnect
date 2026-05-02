@@ -24,8 +24,8 @@ const users = [
   },
   {
     id: 'admin-1',
-    name: 'Admin Bénin',
-    email: 'admin@beninartisan.com',
+    name: 'Admin Thus',
+    email: 'admin@thusartisan.com',
     password: bcrypt.hashSync('admin123', 10),
     role: 'admin'
   }
